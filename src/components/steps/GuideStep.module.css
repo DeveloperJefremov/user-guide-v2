@@ -1,0 +1,139 @@
+/* step content */
+.step {
+	/* outline: 2px solid red; */
+	padding: 20px;
+	border: 1px solid #ddd;
+	margin: 10px 0;
+	margin-bottom: 30px;
+}
+.stepContent {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	display: grid;
+}
+
+.stepBodyContent__container {
+	display: flex;
+	justify-content: space-around;
+
+	/* align-items: flex-start; */
+	/* gap: 10px; */
+}
+.stepBodyContent__form {
+	flex: 0 1 500px; /* Фиксированная ширина для поля изображения, можно изменить значение */
+	display: flex;
+	flex-direction: column;
+}
+
+.stepBodyContent__image {
+	display: flex;
+	width: 500px;
+	flex-direction: column;
+}
+.stepDetails label {
+	display: block;
+	/* margin-bottom: 100px; */
+}
+
+.input,
+.textarea {
+	resize: none;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 8px;
+	font-size: 1rem;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 10px;
+}
+
+.input:focus,
+.textarea:focus {
+	border-color: #007bff;
+	outline: none;
+}
+
+/* header */
+.stepHeader {
+	/* outline: 2px solid red; */
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	/* padding: 10px 20px; */
+
+	/* border-bottom: 1px solid #ddd; */
+	/* margin-bottom: 10px; */
+}
+
+.stepHeader__text {
+	display: flex;
+
+	flex-direction: column;
+}
+
+.stepHeader__buttonContainer {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
+
+/* footer */
+.stepFooter {
+	display: flex; /* Добавлено для работы с flex-контейнером */
+}
+
+.expanded .stepFooter {
+	opacity: 1; /* Fade in to full opacity */
+	max-height: 100px; /* Увеличим max-height достаточно для того, чтобы вместить весь контент */
+	padding: 10px 20px; /* Изменено: восстанавливаем padding при раскрытии */
+}
+
+.folded .stepFooter {
+	opacity: 0; /* Ensure opacity is 0 */
+	max-height: 0; /* Max-height 0 to hide the content */
+	padding: 0 20px; /* Изменено: убираем вертикальный padding в свернутом состоянии */
+}
+
+/* step body */
+
+.stepBody {
+	opacity: 0; /* Start with 0 opacity */
+	transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
+	max-height: 0; /* Collapsed by default */
+	overflow: hidden; /* Hide content that exceeds max-height */
+}
+
+.expanded {
+	opacity: 1; /* Fade in to full opacity */
+	max-height: 1000px; /* Увеличим max-height достаточно для того, чтобы вместить весь контент */
+}
+
+.folded {
+	opacity: 0; /* Ensure opacity is 0 */
+	max-height: 0; /* Max-height 0 to hide the content */
+}
+
+/* Animation for fading in */
+@keyframes fadeIn {
+	0% {
+		opacity: 0;
+		max-height: 0;
+	}
+	100% {
+		opacity: 1;
+		max-height: 1000px; /* Достаточно большое значение */
+	}
+}
+
+/* Animation for fading out */
+@keyframes fadeOut {
+	0% {
+		opacity: 1;
+		max-height: 1000px; /* Достаточно большое значение */
+	}
+	100% {
+		opacity: 0;
+		max-height: 0;
+	}
+}
+/* step body end */

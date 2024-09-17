@@ -1,0 +1,58 @@
+.mainContent {
+	padding: 20px;
+	display: grid;
+	grid-template-rows: 150px 1fr 50px;
+	overflow-y: auto;
+	background-color: var(--background);
+}
+
+.mainHeader {
+	position: relative;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	border-bottom: 1px solid #ddd;
+}
+
+.mainHeader__title {
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+.mainHeader__text {
+	font-size: 16px;
+	margin-bottom: 20px;
+	text-align: center; /* Центрирование текста */
+	line-height: 1.5;
+}
+
+/* .mainHeader__loginButton {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+} */
+
+.mainBody {
+	/* display: flex; */
+	width: 90%;
+
+	margin: 0 auto;
+
+	/* flex: 1; */
+	/* min-height: 75vh; */
+	padding: 20px;
+}
+
+.mainFooter {
+	flex-shrink: 0; /* Футер не сжимается */
+	border-top: 1px solid #ddd;
+	padding: 10px 20px;
+}
+
+.mainFooter__info {
+	padding-top: 10px;
+	text-align: center;
+	display: flex;
+	justify-content: center;
+}

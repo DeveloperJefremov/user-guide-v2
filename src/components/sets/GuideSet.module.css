@@ -1,0 +1,80 @@
+.guideSet {
+	border: 1px solid black;
+	display: grid;
+	grid-template-rows: 100px 1fr;
+	padding: 2.5rem;
+	border-radius: 10px;
+	margin-bottom: 20px;
+
+	background-color: white;
+}
+
+.guideSetHeader {
+	/* padding-left: 20px; */
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.guideSetHeader__buttonContainer {
+	padding-right: 10px;
+	display: flex;
+	gap: 30px;
+	align-items: center;
+}
+
+.expanded .setFooter {
+	opacity: 1; /* Fade in to full opacity */
+	max-height: 100px; /* Увеличим max-height достаточно для того, чтобы вместить весь контент */
+	padding: 10px 20px; /* Изменено: восстанавливаем padding при раскрытии */
+}
+
+.folded .setFooter {
+	opacity: 0; /* Ensure opacity is 0 */
+	max-height: 0; /* Max-height 0 to hide the content */
+	padding: 0 20px; /* Изменено: убираем вертикальный padding в свернутом состоянии */
+}
+
+/* step body */
+
+.setBody {
+	opacity: 0; /* Start with 0 opacity */
+	transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
+	max-height: 0; /* Collapsed by default */
+	overflow: hidden; /* Hide content that exceeds max-height */
+}
+
+.expanded {
+	opacity: 1; /* Fade in to full opacity */
+	max-height: fit-content; /* Увеличим max-height достаточно для того, чтобы вместить весь контент */
+	transition: all 0.3s ease-in-out;
+}
+
+.folded {
+	opacity: 0; /* Ensure opacity is 0 */
+	max-height: 0; /* Max-height 0 to hide the content */
+}
+
+/* Animation for fading in */
+@keyframes fadeIn {
+	0% {
+		opacity: 0;
+		max-height: 0;
+	}
+	100% {
+		opacity: 1;
+		max-height: fit-content; /* Достаточно большое значение */
+	}
+}
+
+/* Animation for fading out */
+@keyframes fadeOut {
+	0% {
+		opacity: 1;
+		max-height: fit-content; /* Достаточно большое значение */
+	}
+	100% {
+		opacity: 0;
+		max-height: 0;
+	}
+}

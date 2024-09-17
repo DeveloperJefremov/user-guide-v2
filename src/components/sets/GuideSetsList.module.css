@@ -1,0 +1,32 @@
+.guideSetsList {
+	padding-top: 15px;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	/* margin-right: 50px; */
+}
+.guideSetsList__setsList {
+	padding-left: 0;
+}
+
+.guideSetsList__header {
+	/* border: 1px solid black; */
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: space-between;
+	align-items: center;
+	/* padding-left: 45px; */
+}
+
+.guideSetsList__createSection {
+	flex-shrink: 0; /* Чтобы секция не сжималась */
+	padding: 10px;
+	display: flex;
+
+	flex-direction: column;
+}
+.guideSetsList__setsList {
+	padding-right: 40px;
+}

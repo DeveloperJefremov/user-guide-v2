@@ -1,0 +1,74 @@
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	cursor: pointer;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	padding: 0.6em 1.2em;
+	font-size: 1em;
+	font-weight: 500;
+	font-family: inherit;
+	background-color: #1a1a1a;
+	cursor: pointer;
+	transition: border-color 0.25s;
+}
+
+button:hover {
+	border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+	outline: 4px auto -webkit-focus-ring-color;
+}
+
+.button:disabled {
+	background-color: #ccc;
+	cursor: not-allowed;
+}
+
+.greyButton {
+	background-color: #796c7d;
+	color: #fff;
+}
+
+.lightGreyButton {
+	background-color: #e0e0e0;
+	color: #000;
+}
+
+.defaultButton {
+	background-color: #007bff;
+	color: #fff;
+}
+
+.greyButton:hover,
+.lightGreyButton:hover,
+.defaultButton:hover {
+	opacity: 0.8;
+}
+
+.iconSize {
+	width: 25px;
+	height: 25px;
+	padding: 1px;
+}
+
+.small {
+	height: 40px;
+	padding: 4 8 4 8;
+	border-radius: 4px;
+}
+
+.medium {
+	height: 46px;
+	padding: 8 16 8 16;
+	border-radius: 4px;
+}
+
+.large {
+	height: 52px;
+	padding: 9 19 9 19;
+	border-radius: 4px;
+}

@@ -1,0 +1,33 @@
+/* GuideStepsList.module.css */
+.guideSetsList {
+	padding-top: 15px;
+	display: flex;
+	flex-direction: column;
+	/* margin-right: 50px; */
+}
+
+.guideStepsList__header {
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.guideSetsList__createSection {
+	flex-shrink: 0; /* Чтобы секция не сжималась */
+	padding: 10px;
+	display: flex;
+
+	flex-direction: column;
+}
+
+.guideStepsList__stepsList {
+	padding-right: 40px;
+}
+
+.highlight {
+	outline: 2px solid rgb(132, 0, 255);
+	background-color: rgba(0, 0, 255, 0.1);
+	position: relative;
+	z-index: 9999;
+}
