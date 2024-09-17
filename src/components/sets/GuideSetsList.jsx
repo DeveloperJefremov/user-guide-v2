@@ -1,20 +1,12 @@
 import { Reorder } from 'framer-motion';
-import localforage from 'localforage'; // Импортируем localforage
+import localforage from 'localforage';
 import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid'; // Импортируем uuid
 import Button from '../../UI/Button';
 import Modal from '../../UI/Modal';
 import GuideSet from './GuideSet';
 import GuideSetHeaderForm from './GuideSetHeaderForm';
 import styles from './GuideSetsList.module.css';
-
-// Настраиваем localforage для работы с базой данных
-localforage.config({
-	driver: localforage.INDEXEDDB, // По умолчанию IndexedDB
-	name: 'GuideApp', // Название базы данных
-	version: 1.0,
-	storeName: 'guideStore', // Название хранилища
-	description: 'Local storage for guide sets and steps',
-});
 
 export default function GuideSetsList() {
 	const [guideSetsList, setGuideSetsList] = useState([]);
@@ -25,7 +17,7 @@ export default function GuideSetsList() {
 	const [activeGuideSetId, setActiveGuideSetId] = useState(null);
 	const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
 
-	// Загружаем данные из localForage при монтировании
+	// Загружаем данные из LocalForage при монтировании
 	useEffect(() => {
 		const loadData = async () => {
 			const savedGuideSets = await localforage.getItem('guideSets');
@@ -64,22 +56,6 @@ export default function GuideSetsList() {
 			saveDataToLocalForage();
 		}
 	}, [guideSetsList]);
-
-	useEffect(() => {
-		if (mode === 'create') {
-			const savedNewSetTitle = localStorage.getItem('newSetTitle');
-			if (savedNewSetTitle) {
-				setNewSetTitle(savedNewSetTitle);
-			}
-		} else if (mode === 'edit' && currentSetId) {
-			const savedEditSetTitle = localStorage.getItem(
-				`editSetTitle_${currentSetId}`
-			);
-			if (savedEditSetTitle) {
-				setNewSetTitle(savedEditSetTitle);
-			}
-		}
-	}, [mode, currentSetId]);
 
 	const handleTitleChange = newTitle => {
 		setNewSetTitle(newTitle);
@@ -125,9 +101,9 @@ export default function GuideSetsList() {
 		}
 
 		if (mode === 'create') {
-			// Создаем новый набор
+			// Создаем новый набор с уникальным UUID
 			const newSet = {
-				id: guideSetsList.length + 1,
+				id: uuidv4(), // Генерация уникального UUID для нового набора
 				setHeader: newSetTitle,
 				setFooter: 'Footer for the new set',
 				stepsIdList: [], // Пустой список для нового набора
