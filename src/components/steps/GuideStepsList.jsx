@@ -5,7 +5,6 @@ import Button from '../../UI/Button';
 import Modal from '../../UI/Modal';
 import GuideStep from './GuideStep';
 import GuideStepForm from './GuideStepForm';
-import styles from './GuideStepsList.module.css';
 
 const initialFormData = {
 	title: '',
@@ -34,7 +33,7 @@ export default function GuideStepsList({
 	const [formData, setFormData] = useState(initialFormData);
 
 	const getEditFormDataKey = (guideSetId, stepId) =>
-		`editFormData_${guideSetId}_${stepId}`; // Теперь учитываем и guideSetId и stepId
+		`editFormData_${guideSetId}_${stepId}`;
 
 	// Загружаем шаги по guideSetId
 	useEffect(() => {
@@ -75,7 +74,7 @@ export default function GuideStepsList({
 				}
 			} else if (mode === 'edit') {
 				const currentStep = steps[currentStepIndex];
-				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id); // Ключ теперь включает guideSetId
+				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
 				const savedEditData = localStorage.getItem(editDataKey);
 				if (savedEditData) {
 					setFormData(JSON.parse(savedEditData));
@@ -91,7 +90,7 @@ export default function GuideStepsList({
 			localStorage.removeItem('createFormData');
 		} else if (mode === 'edit') {
 			const currentStep = steps[currentStepIndex];
-			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id); // Очистка ключа для конкретного набора и шага
+			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
 			localStorage.removeItem(editDataKey);
 		}
 	};
@@ -107,7 +106,7 @@ export default function GuideStepsList({
 		if (mode === 'create') {
 			const newStep = { ...formData, id: String(steps.length + 1) };
 			updatedSteps = [...steps, newStep];
-			handleStepsIdListUpdate(guideSetId, newStep.id); // Обновляем stepsIdList
+			handleStepsIdListUpdate(guideSetId, newStep.id);
 		} else {
 			updatedSteps = steps.map((step, index) =>
 				index === currentStepIndex ? { ...step, ...formData } : step
@@ -115,27 +114,26 @@ export default function GuideStepsList({
 		}
 
 		setSteps(updatedSteps);
-		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps); // Сохраняем шаги в LocalForage
+		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps);
 		setIsModalOpen(false);
 		setFormData(initialFormData);
-		clearLocalStorage(); // Очищаем данные формы из localStorage
+		clearLocalStorage();
 	};
 
 	const handleDeleteStep = async stepIndex => {
 		const updatedSteps = steps.filter((_, index) => index !== stepIndex);
 		setSteps(updatedSteps);
-		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps); // Сохраняем обновлённые шаги
+		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps);
 	};
 
 	const handleFormChange = newFormData => {
 		setFormData(newFormData);
 
-		// Сохраняем данные формы в localStorage
 		if (mode === 'create') {
 			localStorage.setItem('createFormData', JSON.stringify(newFormData));
 		} else if (mode === 'edit') {
 			const currentStep = steps[currentStepIndex];
-			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id); // Сохраняем данные для конкретного набора и шага
+			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
 			localStorage.setItem(editDataKey, JSON.stringify(newFormData));
 		}
 	};
@@ -171,7 +169,13 @@ export default function GuideStepsList({
 	const highlightElement = elementId => {
 		const element = document.getElementById(elementId);
 		if (element) {
-			element.classList.add(styles.highlight);
+			element.classList.add(
+				'outline',
+				'outline-purple-700',
+				'bg-blue-100',
+				'z-50',
+				'relative'
+			);
 			const rect = element.getBoundingClientRect();
 			setModalPosition({
 				top: rect.top + window.scrollY,
@@ -185,7 +189,13 @@ export default function GuideStepsList({
 	const removeHighlightElement = elementId => {
 		const element = document.getElementById(elementId);
 		if (element) {
-			element.classList.remove(styles.highlight);
+			element.classList.remove(
+				'outline',
+				'outline-purple-700',
+				'bg-blue-100',
+				'z-50',
+				'relative'
+			);
 		}
 	};
 
@@ -206,9 +216,9 @@ export default function GuideStepsList({
 	}, [currentStepIndex, mode, steps, activeGuideSetId, guideSetId]);
 
 	return (
-		<div className={styles.guideStepsList}>
-			<header className={styles.guideStepsList__header}>
-				<section className={styles.guideSetsList__createSection}>
+		<div className='flex flex-col pt-4'>
+			<header className='flex flex-row-reverse justify-between items-center'>
+				<section className='flex flex-col flex-shrink-0 p-2'>
 					<h2>Create New Lesson</h2>
 					<Button size='lg' variant='lightGrey' onClick={handleCreateStep}>
 						Add: Lesson
@@ -229,7 +239,7 @@ export default function GuideStepsList({
 
 				<h2>Guide Steps List:</h2>
 			</header>
-			<ul className={styles.guideStepsList__stepsList}>
+			<ul className='pr-10'>
 				<Reorder.Group
 					values={steps}
 					onReorder={steps => {
@@ -245,11 +255,7 @@ export default function GuideStepsList({
 					}}
 				>
 					{steps.map((step, stepIndex) => (
-						<Reorder.Item
-							key={step.id}
-							value={step}
-							className={styles.fontList}
-						>
+						<Reorder.Item key={step.id} value={step}>
 							<GuideStep
 								step={step}
 								handleEditStep={() => handleEditStep(stepIndex)}

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../../UI/Button';
 import GuideStepsList from '../steps/GuideStepsList';
-import styles from './GuideSet.module.css';
 
 export default function GuideSet({
 	isGuideModalOpen,
@@ -24,7 +23,7 @@ export default function GuideSet({
 	};
 
 	return (
-		<section className={styles.guideSet}>
+		<section className='border border-black grid grid-rows-[100px_1fr] p-10 rounded-lg mb-5 bg-white'>
 			<GuideSetHeader
 				isShownSet={isShownSet}
 				handleEditSet={handleEditSet}
@@ -33,11 +32,13 @@ export default function GuideSet({
 				onDisplayChange={displayHandler}
 			/>
 
-			<div className={isShownSet ? styles.expanded : styles.folded}>
+			<div
+				className={isShownSet ? 'opacity-100 max-h-full' : 'opacity-0 max-h-0'}
+			>
 				<GuideSetBody isShownSet={isShownSet}>
 					<GuideStepsList
 						isGuideModalOpen={isGuideModalOpen}
-						guideSetId={guideSet.id} // Передаём id набора
+						guideSetId={guideSet.id}
 						activeGuideSetId={activeGuideSetId}
 						mode={mode}
 						onModeChange={onModeChange}
@@ -61,9 +62,9 @@ const GuideSetHeader = ({
 	let displayButtonText = !isShownSet ? '+' : '-';
 
 	return (
-		<header className={styles.guideSetHeader}>
+		<header className='flex justify-between items-center'>
 			<h3>{title}</h3>
-			<div className={styles.guideSetHeader__buttonContainer}>
+			<div className='flex gap-7 items-center pr-2.5'>
 				<Button onClick={handleEditSet} variant='lightGrey' size='lg'>
 					Edit: Tutorial
 				</Button>
@@ -80,20 +81,24 @@ const GuideSetHeader = ({
 };
 
 const GuideSetBody = ({ children, isShownSet }) => {
-	let cssClassList = `${styles.setBody} ${isShownSet ? styles.expanded : ''} ${
-		!isShownSet ? styles.folded : ''
-	}`;
-
-	return <main className={cssClassList}>{children}</main>;
+	return (
+		<main
+			className={`transition-opacity duration-300 ${
+				isShownSet ? 'opacity-100 max-h-full' : 'opacity-0 max-h-0'
+			} overflow-hidden`}
+		>
+			{children}
+		</main>
+	);
 };
 
 const GuideSetFooter = ({ onLaunchSet, isShownSet }) => {
-	let cssClassList = `${styles.setFooter} ${
-		isShownSet ? styles.expanded : ''
-	} ${!isShownSet ? styles.folded : ''}`;
-
 	return (
-		<footer className={cssClassList}>
+		<footer
+			className={`${
+				isShownSet ? 'opacity-100 max-h-24' : 'opacity-0 max-h-0'
+			} transition-all duration-300 overflow-hidden`}
+		>
 			{onLaunchSet && (
 				<Button onClick={onLaunchSet} variant='default' size='lg'>
 					Launch: Tutorial

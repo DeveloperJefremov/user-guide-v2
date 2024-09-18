@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Button from '../../UI/Button';
 
-import styles from './GuideStepForm.module.css';
-
 export default function GuideStepForm({
 	data,
 	mode,
@@ -32,23 +30,16 @@ export default function GuideStepForm({
 		}
 	}, [data, mode]);
 
-	// // Обновляем форму при изменении начальных данных
-	// useEffect(() => {
-	// 	setFormData(data ?? initialData);
-	// }, [data]);
-
 	const handleInputChange = e => {
 		const { name, value, type, checked } = e.target;
 		const updatedFormData = {
 			...formData,
-			[name]: type === 'checkbox' ? checked : value, // Обрабатываем checkbox отдельно
+			[name]: type === 'checkbox' ? checked : value,
 		};
 		setFormData(updatedFormData);
-		onChange(updatedFormData); // Передаем изменения в родительский компонент
-		// localStorage.setItem('formData', JSON.stringify(updatedFormData));
+		onChange(updatedFormData);
 	};
 
-	// Обработка изменения checkbox для изображения
 	const handleImgCheckboxChange = async e => {
 		const checked = e.target.checked;
 		let updatedData = { ...formData, imgChecked: checked };
@@ -78,17 +69,18 @@ export default function GuideStepForm({
 		}
 
 		setFormData(updatedData);
-		onChange(updatedData); // Передаем изменения в родительский компонент
-		// localStorage.setItem('formData', JSON.stringify(updatedData));
+		onChange(updatedData);
 	};
 
 	return (
-		<div className={styles.guideStepForm}>
-			<form className={styles.stepBodyContent__form}>
-				<label htmlFor='title'> Title:</label>
+		<div className='flex flex-col gap-5 p-5'>
+			<form className='flex flex-col gap-4'>
+				<label htmlFor='title' className='block'>
+					Title:
+				</label>
 				<input
 					id='title'
-					className={styles.input}
+					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					type='text'
 					name='title'
 					value={formData.title}
@@ -96,10 +88,12 @@ export default function GuideStepForm({
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
-				<label htmlFor='order'>Order:</label>
+				<label htmlFor='order' className='block'>
+					Order:
+				</label>
 				<input
 					id='order'
-					className={styles.input}
+					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					type='number'
 					name='order'
 					value={formData.order}
@@ -107,30 +101,36 @@ export default function GuideStepForm({
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
-				<label htmlFor='description'>Description:</label>
+				<label htmlFor='description' className='block'>
+					Description:
+				</label>
 				<textarea
 					id='description'
-					className={styles.textarea}
+					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none h-32'
 					name='description'
 					value={formData.description}
 					onChange={handleInputChange}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
-				<label htmlFor='pageUrl'>Page URL:</label>
+				<label htmlFor='pageUrl' className='block'>
+					Page URL:
+				</label>
 				<input
 					id='pageUrl'
-					className={styles.input}
+					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					name='pageUrl'
 					value={formData.pageUrl}
 					onChange={handleInputChange}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
-				<label htmlFor='elementId'>Element ID:</label>
+				<label htmlFor='elementId' className='block'>
+					Element ID:
+				</label>
 				<input
 					id='elementId'
-					className={styles.input}
+					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					type='text'
 					name='elementId'
 					value={formData.elementId}
@@ -139,9 +139,11 @@ export default function GuideStepForm({
 				/>
 			</form>
 
-			<fieldset className={styles.stepBodyContent__image}>
+			<fieldset className='flex flex-col'>
 				<legend>Image Settings</legend>
-				<label htmlFor='imgChecked'>Image:</label>
+				<label htmlFor='imgChecked' className='block'>
+					Image:
+				</label>
 				<input
 					id='imgChecked'
 					name='imgChecked'
@@ -153,7 +155,9 @@ export default function GuideStepForm({
 
 				{formData.imgChecked && formData.imageUrl && (
 					<>
-						<label htmlFor='imgWidth'>Image Width:</label>
+						<label htmlFor='imgWidth' className='block'>
+							Image Width:
+						</label>
 						<input
 							id='imgWidth'
 							type='number'
@@ -162,9 +166,12 @@ export default function GuideStepForm({
 							value={formData.imgWidth}
 							onChange={handleInputChange}
 							disabled={mode !== 'create' && mode !== 'edit'}
-							className={styles.input}
+							className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 						/>
-						<label htmlFor='imgHeight'>Image Height:</label>
+
+						<label htmlFor='imgHeight' className='block'>
+							Image Height:
+						</label>
 						<input
 							id='imgHeight'
 							type='number'
@@ -173,19 +180,22 @@ export default function GuideStepForm({
 							value={formData.imgHeight}
 							onChange={handleInputChange}
 							disabled={mode !== 'create' && mode !== 'edit'}
-							className={styles.input}
+							className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 						/>
 						<img
-							className={styles.stepImagePreview}
+							className='mt-4'
 							src={formData.imageUrl}
 							alt={formData.title}
-							width={formData.imgWidth}
-							height={formData.imgHeight}
+							style={{
+								width: `${formData.imgWidth}px`,
+								height: `${formData.imgHeight}px`,
+							}}
 						/>
 					</>
 				)}
 			</fieldset>
-			<div className={styles.guideStepForm__buttonContainer}>
+
+			<div className='flex justify-end gap-4 pt-5'>
 				<Button variant='lightGrey' size='md' onClick={handleCancel}>
 					Cancel
 				</Button>

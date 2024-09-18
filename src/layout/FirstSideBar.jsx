@@ -1,4 +1,3 @@
-import styles from './FirstSideBar.module.css';
 function FirstSideBar() {
 	const elements = [
 		{
@@ -64,13 +63,17 @@ function FirstSideBar() {
 	];
 
 	return (
-		<aside className={styles.FirstSideBar}>
-			<h2>1 </h2>
-			<div className={styles.FirstSideBar__elements}>
+		<aside className='flex flex-col items-center bg-dark-primary border-r border-black h-full p-4'>
+			<h2 className='text-xl font-bold mb-6'>1</h2>
+			<div className='flex flex-col items-center justify-around w-1/2 gap-12'>
 				{elements.map(element => (
 					<div key={element.id}>
 						{element.type === 'button' && (
-							<button id={element.id} onClick={element.onClick}>
+							<button
+								id={element.id}
+								onClick={element.onClick}
+								// className=' bg-primary text-white rounded-md'
+							>
 								{element.label}
 							</button>
 						)}
@@ -80,14 +83,19 @@ function FirstSideBar() {
 								href={element.href}
 								target={element.target}
 								rel='noopener noreferrer'
+								className='text-primary underline'
 							>
 								{element.label}
 							</a>
 						)}
 						{element.type === 'icon' && (
-							<div id={element.id} onClick={element.onClick}>
-								<span className={styles['icon']}>{element.icon}</span>
-								{element.label}
+							<div
+								id={element.id}
+								onClick={element.onClick}
+								className='flex items-center cursor-pointer'
+							>
+								<span className='text-xl'>{element.icon}</span>{' '}
+								<span className='ml-2'>{element.label}</span>
 							</div>
 						)}
 					</div>

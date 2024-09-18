@@ -1,16 +1,16 @@
 import GuideSetsList from '../components/sets/GuideSetsList';
-import Button from '../UI/Button';
 
-import styles from './MainContent.module.css';
 const MainContentHeader = ({ title, description }) => {
 	return (
-		<header className={styles.mainHeader}>
-			<h1 className={styles.mainHeader__title}>{title}</h1>
-			<p className={styles.mainHeader__text}>{description}</p>
+		<header className='flex flex-col items-center justify-center p-5 border-b border-gray-300'>
+			<h1 className='mb-2 text-center text-2xl font-bold'>{title}</h1>
+			<p className='text-center text-base mb-5 leading-relaxed'>
+				{description}
+			</p>
 			{/* <Button
 				size='lg'
 				variant='lightGrey'
-				className={styles.mainHeader__loginButton}
+				className='absolute top-5 right-5'
 			>
 				Login as admin
 			</Button> */}
@@ -19,20 +19,20 @@ const MainContentHeader = ({ title, description }) => {
 };
 
 const MainContentBody = ({ children }) => {
-	return <main className={styles.mainBody}>{children}</main>;
+	return <main className='w-11/12 mx-auto p-5'>{children}</main>;
 };
 
 const MainContentFooter = ({ info }) => {
 	return (
-		<footer className={styles.mainFooter}>
-			<small className={styles.mainFooter__info}>{info}</small>
+		<footer className='flex justify-center border-t border-gray-300 p-4'>
+			<small className='pt-2 text-center'>{info}</small>
 		</footer>
 	);
 };
 
 export default function MainContent() {
 	return (
-		<section className={styles.mainContent}>
+		<section className='grid grid-rows-[150px_1fr_50px] h-full overflow-y-auto bg-background p-5'>
 			<MainContentHeader
 				title='User Guide'
 				description='User guides are a type of technical documentation that enables customers and end-users with step-by-step instructions on how to execute a task or process.'

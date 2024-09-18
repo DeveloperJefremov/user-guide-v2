@@ -1,12 +1,11 @@
 import { Reorder } from 'framer-motion';
 import localforage from 'localforage';
 import { useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid'; // Импортируем uuid
+import { v4 as uuidv4 } from 'uuid';
 import Button from '../../UI/Button';
 import Modal from '../../UI/Modal';
 import GuideSet from './GuideSet';
 import GuideSetHeaderForm from './GuideSetHeaderForm';
-import styles from './GuideSetsList.module.css';
 
 export default function GuideSetsList() {
 	const [guideSetsList, setGuideSetsList] = useState([]);
@@ -38,9 +37,9 @@ export default function GuideSetsList() {
 		const loadData = async () => {
 			const savedGuideSets = await localforage.getItem('guideSets');
 			if (savedGuideSets) {
-				setGuideSetsList(savedGuideSets); // Устанавливаем данные из localforage
+				setGuideSetsList(savedGuideSets);
 			} else {
-				setGuideSetsList([]); // Начинаем с пустого массива, если данных нет
+				setGuideSetsList([]);
 			}
 		};
 
@@ -53,7 +52,7 @@ export default function GuideSetsList() {
 			if (set.id === setId) {
 				return {
 					...set,
-					stepsIdList: [...set.stepsIdList, stepId], // Добавляем шаг в список идентификаторов
+					stepsIdList: [...set.stepsIdList, stepId],
 				};
 			}
 			return set;
@@ -97,8 +96,8 @@ export default function GuideSetsList() {
 
 	const handleEditSet = id => {
 		const selectedSet = guideSetsList.find(set => set.id === id);
-		setNewSetTitle(selectedSet.setHeader); // Заполняем заголовок выбранного набора
-		setCurrentSetId(id); // Запоминаем ID текущего набора
+		setNewSetTitle(selectedSet.setHeader);
+		setCurrentSetId(id);
 		setMode('edit');
 		setIsModalOpen(true);
 	};
@@ -119,13 +118,13 @@ export default function GuideSetsList() {
 		if (mode === 'create') {
 			// Создаем новый набор с уникальным UUID
 			const newSet = {
-				id: uuidv4(), // Генерация уникального UUID для нового набора
+				id: uuidv4(),
 				setHeader: newSetTitle,
 				setFooter: 'Footer for the new set',
-				stepsIdList: [], // Пустой список для нового набора
+				stepsIdList: [],
 			};
 			setGuideSetsList([...guideSetsList, newSet]);
-			localStorage.removeItem('newSetTitle'); // Удаляем данные из localStorage
+			localStorage.removeItem('newSetTitle');
 		} else if (mode === 'edit') {
 			// Обновляем существующий набор
 			const updatedGuideSetsList = guideSetsList.map(guideSet => {
@@ -138,7 +137,7 @@ export default function GuideSetsList() {
 				return guideSet;
 			});
 			setGuideSetsList(updatedGuideSetsList);
-			localStorage.removeItem(`editSetTitle_${currentSetId}`); // Удаляем данные из localStorage
+			localStorage.removeItem(`editSetTitle_${currentSetId}`);
 		}
 
 		setIsModalOpen(false);
@@ -156,9 +155,9 @@ export default function GuideSetsList() {
 	};
 
 	return (
-		<section className={styles.guideSetsList}>
-			<header className={styles.guideSetsList__header}>
-				<section className={styles.guideSetsList__createSection}>
+		<section className='pt-4 flex flex-col justify-center'>
+			<header className='flex flex-row-reverse justify-between items-center'>
+				<section className='flex-shrink-0 p-3 flex flex-col'>
 					<h2>Create New Set</h2>
 					<Button onClick={handleCreateSet} variant='lightGrey' size='lg'>
 						Add: Tutorial
@@ -180,12 +179,12 @@ export default function GuideSetsList() {
 				<h2>Guide Sets List:</h2>
 			</header>
 
-			<ul className={styles.guideSetsList__setsList}>
+			<ul className='pl-0 pr-10'>
 				<Reorder.Group values={guideSetsList} onReorder={setGuideSetsList}>
 					{guideSetsList.map((guideSet, index) => (
 						<Reorder.Item
 							value={guideSet}
-							className={styles.fontList}
+							className='list-none'
 							key={guideSet.id}
 						>
 							<article key={guideSet.id || `set-${index}`}>

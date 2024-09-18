@@ -1,5 +1,4 @@
 import Button from '../../UI/Button';
-import styles from './GuideSetHeaderForm.module.css';
 
 const GuideSetHeaderForm = ({
 	mode,
@@ -9,8 +8,8 @@ const GuideSetHeaderForm = ({
 	onCancel,
 }) => {
 	return (
-		<form className={styles.guideSetHeader}>
-			<label htmlFor='titleInput' className={styles.guideSetHeader__label}>
+		<form className='p-5 bg-gray-100 rounded-lg shadow-md flex flex-col'>
+			<label htmlFor='titleInput' className='text-lg mb-2'>
 				{mode === 'edit' ? 'Edit Tutorial Title' : 'Create New Tutorial Title'}
 			</label>
 
@@ -19,11 +18,11 @@ const GuideSetHeaderForm = ({
 				type='text'
 				value={title}
 				onChange={e => onTitleChange(e.target.value)}
-				className={styles.guideSetHeader__titleInput}
+				className='p-3 text-base border border-gray-300 rounded focus:border-blue-500 mb-5'
 				placeholder='Enter title'
 			/>
 
-			<div className={styles.guideSetHeader__buttonContainer}>
+			<div className='flex justify-end gap-3'>
 				<Button onClick={onCancel} variant='lightGrey' size='lg'>
 					Cancel
 				</Button>

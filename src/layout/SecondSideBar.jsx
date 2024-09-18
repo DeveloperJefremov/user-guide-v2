@@ -1,5 +1,3 @@
-import styles from './SecondSideBar.module.css'; // Импортируем стили как модуль
-
 const SecondSideBar = () => {
 	// Массив элементов с уникальными ID и типами
 	const elements = [
@@ -66,13 +64,18 @@ const SecondSideBar = () => {
 	];
 
 	return (
-		<aside className={styles.SecondSideBar}>
-			<h2>2</h2>
-			<div className={styles.SecondSideBar__elements}>
+		<aside className='flex flex-col items-center bg-muted border-r border-black h-full p-4'>
+			<h2 className='text-xl font-bold mb-6'>2</h2>
+			<div className='flex flex-col items-center justify-around gap-12'>
 				{elements.map(element => (
-					<div key={element.id}>
+					<div key={element.id} className='w-full'>
 						{element.type === 'button' && (
-							<button type='button' id={element.id} onClick={element.onClick}>
+							<button
+								type='button'
+								id={element.id}
+								onClick={element.onClick}
+								// className='w-full px-4 py-2 bg-primary text-white rounded-md'
+							>
 								{element.label}
 							</button>
 						)}
@@ -82,14 +85,19 @@ const SecondSideBar = () => {
 								href={element.href}
 								target={element.target}
 								rel='noopener noreferrer'
+								className='w-full text-primary underline block text-center'
 							>
 								{element.label}
 							</a>
 						)}
 						{element.type === 'icon' && (
-							<div id={element.id} onClick={element.onClick}>
-								<span>{element.icon}</span>
-								{element.label}
+							<div
+								id={element.id}
+								onClick={element.onClick}
+								className='flex items-center justify-center cursor-pointer'
+							>
+								<span className='text-xl'>{element.icon}</span>
+								<span className='ml-2'>{element.label}</span>
 							</div>
 						)}
 					</div>
