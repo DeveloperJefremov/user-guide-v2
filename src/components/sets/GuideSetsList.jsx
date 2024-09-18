@@ -16,21 +16,24 @@ export default function GuideSetsList() {
 	const [activeGuideSetId, setActiveGuideSetId] = useState(null);
 	const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
 
+	// Загружаем данные из localStorage при открытии модального окна
 	useEffect(() => {
-		if (mode === 'create') {
-			const savedNewSetTitle = localStorage.getItem('newSetTitle');
-			if (savedNewSetTitle) {
-				setNewSetTitle(savedNewSetTitle);
-			}
-		} else if (mode === 'edit' && currentSetId) {
-			const savedEditSetTitle = localStorage.getItem(
-				`editSetTitle_${currentSetId}`
-			);
-			if (savedEditSetTitle) {
-				setNewSetTitle(savedEditSetTitle);
+		if (isModalOpen) {
+			if (mode === 'create') {
+				const savedNewSetTitle = localStorage.getItem('newSetTitle');
+				if (savedNewSetTitle) {
+					setNewSetTitle(savedNewSetTitle);
+				}
+			} else if (mode === 'edit' && currentSetId) {
+				const savedEditSetTitle = localStorage.getItem(
+					`editSetTitle_${currentSetId}`
+				);
+				if (savedEditSetTitle) {
+					setNewSetTitle(savedEditSetTitle);
+				}
 			}
 		}
-	}, [mode, currentSetId]);
+	}, [isModalOpen, mode, currentSetId]);
 
 	// Загружаем данные из LocalForage при монтировании
 	useEffect(() => {
@@ -75,6 +78,7 @@ export default function GuideSetsList() {
 	const handleTitleChange = newTitle => {
 		setNewSetTitle(newTitle);
 
+		// Сохраняем изменения в localStorage
 		if (mode === 'create') {
 			localStorage.setItem('newSetTitle', newTitle);
 		} else if (mode === 'edit') {
@@ -116,7 +120,6 @@ export default function GuideSetsList() {
 		}
 
 		if (mode === 'create') {
-			// Создаем новый набор с уникальным UUID
 			const newSet = {
 				id: uuidv4(),
 				setHeader: newSetTitle,
@@ -126,7 +129,6 @@ export default function GuideSetsList() {
 			setGuideSetsList([...guideSetsList, newSet]);
 			localStorage.removeItem('newSetTitle');
 		} else if (mode === 'edit') {
-			// Обновляем существующий набор
 			const updatedGuideSetsList = guideSetsList.map(guideSet => {
 				if (guideSet.id === currentSetId) {
 					return {
@@ -144,9 +146,20 @@ export default function GuideSetsList() {
 		setNewSetTitle('');
 	};
 
+	// Закрытие модального окна при нажатии на Backdrop (серый фон)
+	const handleBackdropClick = () => {
+		// Сохраняем данные только при клике на фон
+		localStorage.setItem(
+			mode === 'create' ? 'newSetTitle' : `editSetTitle_${currentSetId}`,
+			newSetTitle
+		);
+		setIsModalOpen(false);
+	};
+
 	const handleCancel = () => {
 		setIsModalOpen(false);
 		setNewSetTitle('');
+		// Удаляем данные из localStorage при нажатии кнопки Cancel
 		if (mode === 'create') {
 			localStorage.removeItem('newSetTitle');
 		} else if (mode === 'edit') {
@@ -164,7 +177,7 @@ export default function GuideSetsList() {
 					</Button>
 
 					{isModalOpen && (
-						<Modal onClick={handleCancel}>
+						<Modal onClick={handleCancel} onBackdropClick={handleBackdropClick}>
 							<GuideSetHeaderForm
 								mode={mode}
 								title={newSetTitle}
