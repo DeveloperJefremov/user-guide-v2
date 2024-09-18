@@ -17,6 +17,22 @@ export default function GuideSetsList() {
 	const [activeGuideSetId, setActiveGuideSetId] = useState(null);
 	const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
 
+	useEffect(() => {
+		if (mode === 'create') {
+			const savedNewSetTitle = localStorage.getItem('newSetTitle');
+			if (savedNewSetTitle) {
+				setNewSetTitle(savedNewSetTitle);
+			}
+		} else if (mode === 'edit' && currentSetId) {
+			const savedEditSetTitle = localStorage.getItem(
+				`editSetTitle_${currentSetId}`
+			);
+			if (savedEditSetTitle) {
+				setNewSetTitle(savedEditSetTitle);
+			}
+		}
+	}, [mode, currentSetId]);
+
 	// Загружаем данные из LocalForage при монтировании
 	useEffect(() => {
 		const loadData = async () => {

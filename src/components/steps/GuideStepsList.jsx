@@ -33,6 +33,9 @@ export default function GuideStepsList({
 	const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
 	const [formData, setFormData] = useState(initialFormData);
 
+	const getEditFormDataKey = (guideSetId, stepId) =>
+		`editFormData_${guideSetId}_${stepId}`; // Теперь учитываем и guideSetId и stepId
+
 	// Загружаем шаги по guideSetId
 	useEffect(() => {
 		const loadSteps = async () => {
@@ -60,6 +63,39 @@ export default function GuideStepsList({
 		}
 	}, [steps, guideSetId]);
 
+	// Загрузка данных из localStorage при открытии модального окна
+	useEffect(() => {
+		if (isModalOpen) {
+			if (mode === 'create') {
+				const savedCreateData = localStorage.getItem('createFormData');
+				if (savedCreateData) {
+					setFormData(JSON.parse(savedCreateData));
+				} else {
+					setFormData(initialFormData);
+				}
+			} else if (mode === 'edit') {
+				const currentStep = steps[currentStepIndex];
+				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id); // Ключ теперь включает guideSetId
+				const savedEditData = localStorage.getItem(editDataKey);
+				if (savedEditData) {
+					setFormData(JSON.parse(savedEditData));
+				} else {
+					setFormData(currentStep);
+				}
+			}
+		}
+	}, [isModalOpen, mode, currentStepIndex, steps, guideSetId]);
+
+	const clearLocalStorage = () => {
+		if (mode === 'create') {
+			localStorage.removeItem('createFormData');
+		} else if (mode === 'edit') {
+			const currentStep = steps[currentStepIndex];
+			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id); // Очистка ключа для конкретного набора и шага
+			localStorage.removeItem(editDataKey);
+		}
+	};
+
 	const handleCreateStep = () => {
 		setFormData(initialFormData);
 		onModeChange('create');
@@ -82,6 +118,7 @@ export default function GuideStepsList({
 		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps); // Сохраняем шаги в LocalForage
 		setIsModalOpen(false);
 		setFormData(initialFormData);
+		clearLocalStorage(); // Очищаем данные формы из localStorage
 	};
 
 	const handleDeleteStep = async stepIndex => {
@@ -92,6 +129,15 @@ export default function GuideStepsList({
 
 	const handleFormChange = newFormData => {
 		setFormData(newFormData);
+
+		// Сохраняем данные формы в localStorage
+		if (mode === 'create') {
+			localStorage.setItem('createFormData', JSON.stringify(newFormData));
+		} else if (mode === 'edit') {
+			const currentStep = steps[currentStepIndex];
+			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id); // Сохраняем данные для конкретного набора и шага
+			localStorage.setItem(editDataKey, JSON.stringify(newFormData));
+		}
 	};
 
 	const handleEditStep = stepIndex => {
@@ -107,6 +153,7 @@ export default function GuideStepsList({
 		setFormData(initialFormData);
 		setCurrentStepIndex(0);
 		onModeChange('display');
+		clearLocalStorage();
 	};
 
 	const handleNext = () => {
