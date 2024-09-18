@@ -21,7 +21,7 @@ const initialFormData = {
 export default function GuideStepsList({
 	mode,
 	onModeChange,
-	guideSetId, // Используем для загрузки шагов
+	guideSetId,
 	activeGuideSetId,
 	isGuideModalOpen,
 	handleStepsIdListUpdate,
@@ -199,6 +199,18 @@ export default function GuideStepsList({
 		}
 	};
 
+	// Закрытие окна при клике на backdrop (серый фон) только для create/edit
+	const handleBackdropClick = () => {
+		if (mode === 'create') {
+			localStorage.setItem('createFormData', JSON.stringify(formData));
+		} else if (mode === 'edit') {
+			const currentStep = steps[currentStepIndex];
+			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
+			localStorage.setItem(editDataKey, JSON.stringify(formData));
+		}
+		setIsModalOpen(false);
+	};
+
 	useEffect(() => {
 		if (
 			mode === 'execute' &&
@@ -225,7 +237,7 @@ export default function GuideStepsList({
 					</Button>
 
 					{isModalOpen && (
-						<Modal onClick={handleCancel}>
+						<Modal onClick={handleCancel} onBackdropClick={handleBackdropClick}>
 							<GuideStepForm
 								data={formData}
 								mode={mode}
