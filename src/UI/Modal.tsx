@@ -1,7 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import { CSSProperties, FC, ReactNode, useEffect, useRef } from 'react';
+import * as ReactDOM from 'react-dom';
 
-const Backdrop = ({ onClick }) => {
+// Общий интерфейс для пропсов
+interface ModalBaseProps {
+	children: ReactNode;
+	style?: CSSProperties;
+	onClose?: () => void;
+}
+
+const Backdrop: FC<{ onClick: () => void }> = ({ onClick }) => {
 	return (
 		<div
 			className='fixed top-0 left-0 w-full h-full bg-black bg-opacity-75 z-20'
@@ -10,18 +17,20 @@ const Backdrop = ({ onClick }) => {
 	);
 };
 
-const ModalWindow = ({ children, style, onClose }) => {
-	const modalRef = useRef();
+const ModalWindow: FC<ModalBaseProps> = ({ children, style, onClose }) => {
+	const modalRef = useRef<HTMLDivElement | null>(null);
 
 	// Перемещение фокуса на модальное окно при монтировании
 	useEffect(() => {
-		modalRef.current.focus();
+		if (modalRef.current) {
+			modalRef.current.focus();
+		}
 	}, []);
 
 	// Закрытие модального окна при нажатии клавиши Escape
 	useEffect(() => {
-		const handleKeyDown = event => {
-			if (event.key === 'Escape') {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === 'Escape' && onClose) {
 				onClose();
 			}
 		};
@@ -37,11 +46,11 @@ const ModalWindow = ({ children, style, onClose }) => {
 				!style
 					? 'fixed top-44 left-1/2 transform -translate-x-1/2 w-11/12 md:w-1/4'
 					: ''
-			}`} // Если style нет, центрируем окно
-			style={style} // Переданный стиль для динамического позиционирования
-			onClick={e => e.stopPropagation()} // Остановка клика по окну, чтобы не закрывать его
+			}`}
+			style={style}
+			onClick={e => e.stopPropagation()}
 			ref={modalRef}
-			tabIndex={-1} // Делаем элемент фокусируемым
+			tabIndex={-1}
 			role='dialog'
 			aria-modal='true'
 		>
@@ -50,9 +59,18 @@ const ModalWindow = ({ children, style, onClose }) => {
 	);
 };
 
-const portalElement = document.getElementById('overlays');
+interface ModalProps extends ModalBaseProps {
+	onBackdropClick: () => void;
+}
 
-const Modal = ({ onClick, children, style, onBackdropClick }) => {
+const portalElement = document.getElementById('overlays') as HTMLElement;
+
+const Modal: FC<ModalProps> = ({
+	onClose,
+	children,
+	style,
+	onBackdropClick,
+}) => {
 	return (
 		<>
 			{ReactDOM.createPortal(
@@ -60,7 +78,7 @@ const Modal = ({ onClick, children, style, onBackdropClick }) => {
 				portalElement
 			)}
 			{ReactDOM.createPortal(
-				<ModalWindow style={style} onClose={onClick}>
+				<ModalWindow style={style} onClose={onClose}>
 					{children}
 				</ModalWindow>,
 				portalElement

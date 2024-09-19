@@ -1,12 +1,23 @@
-import { useState } from 'react';
+import { FC, useCallback, useState } from 'react';
+import { StepType } from '../../data/types';
 import Button from '../../UI/Button';
 
-export default function GuideStep({ step, handleEditStep, handleDeleteStep }) {
-	const [isShownStep, setIsShownStep] = useState(false);
+interface GuideStepProps {
+	step: StepType;
+	handleEditStep: () => void;
+	handleDeleteStep: () => void;
+}
 
-	const displayHandler = () => {
+const GuideStep: FC<GuideStepProps> = ({
+	step,
+	handleEditStep,
+	handleDeleteStep,
+}) => {
+	const [isShownStep, setIsShownStep] = useState<boolean>(false);
+
+	const displayHandler = useCallback(() => {
 		setIsShownStep(prevState => !prevState); // Переключение состояния показа
-	};
+	}, []);
 
 	return (
 		<section className='border p-5 my-3'>
@@ -14,24 +25,31 @@ export default function GuideStep({ step, handleEditStep, handleDeleteStep }) {
 				handleDeleteStep={handleDeleteStep}
 				handleEditStep={handleEditStep}
 				isShownStep={isShownStep}
-				onDisplayChange={displayHandler} // Передаем корректную функцию
+				onDisplayChange={displayHandler}
 				step={step}
 			/>
-			{isShownStep && <GuideStepBody isShownStep={isShownStep} step={step} />}{' '}
-			{/* Показываем тело шага только если состояние isShownStep true */}
+			{isShownStep && <GuideStepBody step={step} />}
 			<GuideStepFooter isShownStep={isShownStep} />
 		</section>
 	);
+};
+
+interface GuideStepHeaderProps {
+	handleDeleteStep: () => void;
+	handleEditStep: () => void;
+	isShownStep: boolean;
+	onDisplayChange: () => void;
+	step: StepType;
 }
 
-const GuideStepHeader = ({
+const GuideStepHeader: FC<GuideStepHeaderProps> = ({
 	handleDeleteStep,
 	handleEditStep,
 	isShownStep,
 	onDisplayChange,
 	step,
 }) => {
-	let displayButtonText = isShownStep ? '-' : '+';
+	const displayButtonText = isShownStep ? '-' : '+';
 
 	return (
 		<header className='flex justify-between items-center'>
@@ -46,19 +64,19 @@ const GuideStepHeader = ({
 				<Button size='sm' variant='default' onClick={handleDeleteStep}>
 					Delete
 				</Button>
-				<Button
-					size='icon'
-					variant='lightGrey'
-					onClick={onDisplayChange} // Вызываем функцию изменения состояния
-				>
-					{displayButtonText} {/* Отображаем символ "+" или "-" */}
+				<Button size='icon' variant='lightGrey' onClick={onDisplayChange}>
+					{displayButtonText}
 				</Button>
 			</div>
 		</header>
 	);
 };
 
-const GuideStepBody = ({ step }) => {
+interface GuideStepBodyProps {
+	step: StepType;
+}
+
+const GuideStepBody: FC<GuideStepBodyProps> = ({ step }) => {
 	return (
 		<section className='transition-all duration-300 max-h-screen opacity-100 flex justify-center items-start p-8'>
 			<article className='flex justify-between gap-10 max-w-4xl w-full'>
@@ -136,7 +154,11 @@ const GuideStepBody = ({ step }) => {
 	);
 };
 
-const GuideStepFooter = ({ isShownStep }) => {
+interface GuideStepFooterProps {
+	isShownStep: boolean;
+}
+
+const GuideStepFooter: FC<GuideStepFooterProps> = ({ isShownStep }) => {
 	return (
 		<footer
 			className={`transition-all duration-300 ${
@@ -145,3 +167,5 @@ const GuideStepFooter = ({ isShownStep }) => {
 		></footer>
 	);
 };
+
+export default GuideStep;

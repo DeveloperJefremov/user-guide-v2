@@ -1,6 +1,10 @@
+import { FC, ReactNode } from 'react';
 import GuideSetsList from '../components/sets/GuideSetsList';
 
-const MainContentHeader = ({ title, description }) => {
+const MainContentHeader: FC<{ title: string; description: string }> = ({
+	title,
+	description,
+}) => {
 	return (
 		<header className='flex flex-col items-center justify-center p-5 border-b border-gray-300'>
 			<h1 className='mb-2 text-center text-2xl font-bold'>{title}</h1>
@@ -18,11 +22,10 @@ const MainContentHeader = ({ title, description }) => {
 	);
 };
 
-const MainContentBody = ({ children }) => {
+const MainContentBody: FC<{ children: ReactNode }> = ({ children }) => {
 	return <main className='w-11/12 mx-auto p-5'>{children}</main>;
 };
-
-const MainContentFooter = ({ info }) => {
+const MainContentFooter: FC<{ info: string }> = ({ info }) => {
 	return (
 		<footer className='flex justify-center border-t border-gray-300 p-4'>
 			<small className='pt-2 text-center'>{info}</small>
@@ -30,7 +33,7 @@ const MainContentFooter = ({ info }) => {
 	);
 };
 
-export default function MainContent() {
+const MainContent: FC = () => {
 	return (
 		<section className='grid grid-rows-[150px_1fr_50px] h-full overflow-y-auto bg-background p-5'>
 			<MainContentHeader
@@ -43,4 +46,6 @@ export default function MainContent() {
 			<MainContentFooter info='2024 Your Company. All rights reserved.' />
 		</section>
 	);
-}
+};
+
+export default MainContent;

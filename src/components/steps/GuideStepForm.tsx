@@ -1,26 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
+import { StepType } from '../../data/types'; // Используем StepType вместо FormData
 import Button from '../../UI/Button';
 
-export default function GuideStepForm({
+interface GuideStepFormProps {
+	data: StepType; // Используем StepType
+	mode: 'create' | 'edit' | 'view';
+	onChange: (updatedData: StepType) => void; // Используем StepType
+	handleSaveStep: () => void;
+	handleCancel: () => void;
+}
+
+const GuideStepForm: FC<GuideStepFormProps> = ({
 	data,
 	mode,
 	onChange,
 	handleSaveStep,
 	handleCancel,
-}) {
-	const initialData = {
-		title: '',
-		order: '',
-		description: '',
-		pageUrl: '',
-		elementId: '',
-		imgChecked: false,
-		imgWidth: 0,
-		imgHeight: 0,
-		imageUrl: '',
-	};
-
-	const [formData, setFormData] = useState(
+}) => {
+	const initialData = useMemo<StepType>(
+		() => ({
+			id: '',
+			title: '',
+			order: 0,
+			description: '',
+			pageUrl: '',
+			elementId: '',
+			imgChecked: false,
+			imgWidth: 0,
+			imgHeight: 0,
+			imageUrl: '',
+		}),
+		[]
+	);
+	const [formData, setFormData] = useState<StepType>(
 		mode === 'edit' ? data : initialData
 	);
 
@@ -28,26 +40,29 @@ export default function GuideStepForm({
 		if (mode === 'edit' || mode === 'create') {
 			setFormData(data ?? initialData);
 		}
-	}, [data, mode]);
+	}, [data, mode, initialData]);
 
-	const handleInputChange = e => {
-		const { name, value, type, checked } = e.target;
+	const handleInputChange = (
+		e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+	) => {
+		const { name, value, type } = e.target;
 		const updatedFormData = {
 			...formData,
-			[name]: type === 'checkbox' ? checked : value,
+			[name]:
+				type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
 		};
 		setFormData(updatedFormData);
 		onChange(updatedFormData);
 	};
 
-	const handleImgCheckboxChange = async e => {
+	const handleImgCheckboxChange = async (e: ChangeEvent<HTMLInputElement>) => {
 		const checked = e.target.checked;
 		let updatedData = { ...formData, imgChecked: checked };
 
 		if (checked) {
 			try {
 				const response = await fetch('https://dog.ceo/api/breeds/image/random');
-				const data = await response.json();
+				const data: { message: string } = await response.json();
 				if (data && data.message) {
 					updatedData = {
 						...updatedData,
@@ -75,6 +90,7 @@ export default function GuideStepForm({
 	return (
 		<div className='flex flex-col gap-5 p-5'>
 			<form className='flex flex-col gap-4'>
+				{/* Поле Title */}
 				<label htmlFor='title' className='block'>
 					Title:
 				</label>
@@ -88,6 +104,7 @@ export default function GuideStepForm({
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
+				{/* Поле Order */}
 				<label htmlFor='order' className='block'>
 					Order:
 				</label>
@@ -101,6 +118,7 @@ export default function GuideStepForm({
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
+				{/* Поле Description */}
 				<label htmlFor='description' className='block'>
 					Description:
 				</label>
@@ -113,6 +131,7 @@ export default function GuideStepForm({
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
+				{/* Поле Page URL */}
 				<label htmlFor='pageUrl' className='block'>
 					Page URL:
 				</label>
@@ -125,6 +144,7 @@ export default function GuideStepForm({
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
+				{/* Поле Element ID */}
 				<label htmlFor='elementId' className='block'>
 					Element ID:
 				</label>
@@ -139,6 +159,7 @@ export default function GuideStepForm({
 				/>
 			</form>
 
+			{/* Настройки изображения */}
 			<fieldset className='flex flex-col'>
 				<legend>Image Settings</legend>
 				<label htmlFor='imgChecked' className='block'>
@@ -155,6 +176,7 @@ export default function GuideStepForm({
 
 				{formData.imgChecked && formData.imageUrl && (
 					<>
+						{/* Поле Image Width */}
 						<label htmlFor='imgWidth' className='block'>
 							Image Width:
 						</label>
@@ -169,6 +191,7 @@ export default function GuideStepForm({
 							className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 						/>
 
+						{/* Поле Image Height */}
 						<label htmlFor='imgHeight' className='block'>
 							Image Height:
 						</label>
@@ -195,6 +218,7 @@ export default function GuideStepForm({
 				)}
 			</fieldset>
 
+			{/* Кнопки сохранения/отмены */}
 			<div className='flex justify-end gap-4 pt-5'>
 				<Button variant='lightGrey' size='md' onClick={handleCancel}>
 					Cancel
@@ -205,4 +229,6 @@ export default function GuideStepForm({
 			</div>
 		</div>
 	);
-}
+};
+
+export default GuideStepForm;

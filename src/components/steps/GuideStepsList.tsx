@@ -1,15 +1,26 @@
 import { Reorder } from 'framer-motion';
-import localforage from 'localforage';
-import { useEffect, useState } from 'react';
+import * as localforage from 'localforage';
+import { FC, useCallback, useEffect, useState } from 'react';
+import { ModeType, StepType } from '../../data/types';
 import Button from '../../UI/Button';
 import Modal from '../../UI/Modal';
 import GuideStep from './GuideStep';
 import GuideStepForm from './GuideStepForm';
 
-const initialFormData = {
+interface GuideStepsListProps {
+	mode: ModeType;
+	onModeChange: (mode: ModeType) => void;
+	guideSetId: string;
+	activeGuideSetId: string | null;
+	isGuideModalOpen: boolean;
+	handleStepsIdListUpdate: (setId: string, stepId: string) => void;
+}
+
+const initialFormData: StepType = {
+	id: '',
 	title: '',
 	description: '',
-	order: '',
+	order: 0,
 	pageUrl: '',
 	elementId: '',
 	imgChecked: false,
@@ -18,27 +29,35 @@ const initialFormData = {
 	imageUrl: '',
 };
 
-export default function GuideStepsList({
+const GuideStepsList: FC<GuideStepsListProps> = ({
 	mode,
 	onModeChange,
 	guideSetId,
 	activeGuideSetId,
 	isGuideModalOpen,
 	handleStepsIdListUpdate,
-}) {
-	const [steps, setSteps] = useState([]);
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [currentStepIndex, setCurrentStepIndex] = useState(0);
-	const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
-	const [formData, setFormData] = useState(initialFormData);
+}) => {
+	const [steps, setSteps] = useState<StepType[]>([]);
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+	const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
+	const [modalPosition, setModalPosition] = useState<{
+		top: number;
+		left: number;
+	}>({ top: 0, left: 0 });
+	const [formData, setFormData] = useState<StepType>(initialFormData);
 
-	const getEditFormDataKey = (guideSetId, stepId) =>
-		`editFormData_${guideSetId}_${stepId}`;
+	const getEditFormDataKey = useCallback(
+		(guideSetId: string, stepId: string) =>
+			`editFormData_${guideSetId}_${stepId}`,
+		[]
+	);
 
 	// Загружаем шаги по guideSetId
 	useEffect(() => {
 		const loadSteps = async () => {
-			const savedSteps = await localforage.getItem(`guideSteps_${guideSetId}`);
+			const savedSteps = await localforage.getItem<StepType[]>(
+				`guideSteps_${guideSetId}`
+			);
 			if (savedSteps) {
 				setSteps(savedSteps);
 			} else {
@@ -65,43 +84,61 @@ export default function GuideStepsList({
 	// Загрузка данных из localStorage при открытии модального окна
 	useEffect(() => {
 		if (isModalOpen) {
-			if (mode === 'create') {
-				const savedCreateData = localStorage.getItem('createFormData');
-				if (savedCreateData) {
-					setFormData(JSON.parse(savedCreateData));
-				} else {
-					setFormData(initialFormData);
+			try {
+				if (mode === 'create') {
+					const savedCreateData = localStorage.getItem('createFormData');
+					if (savedCreateData) {
+						setFormData(JSON.parse(savedCreateData));
+					} else {
+						setFormData(initialFormData);
+					}
+				} else if (mode === 'edit') {
+					if (steps[currentStepIndex]) {
+						const currentStep = steps[currentStepIndex];
+						const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
+						const savedEditData = localStorage.getItem(editDataKey);
+						if (savedEditData) {
+							setFormData(JSON.parse(savedEditData));
+						} else {
+							setFormData(currentStep);
+						}
+					} else {
+						console.error('Current step not found.');
+					}
 				}
-			} else if (mode === 'edit') {
-				const currentStep = steps[currentStepIndex];
-				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
-				const savedEditData = localStorage.getItem(editDataKey);
-				if (savedEditData) {
-					setFormData(JSON.parse(savedEditData));
-				} else {
-					setFormData(currentStep);
-				}
+			} catch (error) {
+				console.error('Error parsing local storage data:', error);
+				setFormData(initialFormData); // fallback to default
 			}
 		}
-	}, [isModalOpen, mode, currentStepIndex, steps, guideSetId]);
+	}, [
+		isModalOpen,
+		mode,
+		currentStepIndex,
+		steps,
+		guideSetId,
+		getEditFormDataKey,
+	]);
 
-	const clearLocalStorage = () => {
+	const clearLocalStorage = useCallback(() => {
 		if (mode === 'create') {
 			localStorage.removeItem('createFormData');
 		} else if (mode === 'edit') {
-			const currentStep = steps[currentStepIndex];
-			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
-			localStorage.removeItem(editDataKey);
+			if (steps[currentStepIndex]) {
+				const currentStep = steps[currentStepIndex];
+				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
+				localStorage.removeItem(editDataKey);
+			}
 		}
-	};
+	}, [mode, steps, currentStepIndex, guideSetId, getEditFormDataKey]);
 
-	const handleCreateStep = () => {
+	const handleCreateStep = useCallback(() => {
 		setFormData(initialFormData);
 		onModeChange('create');
 		setIsModalOpen(true);
-	};
+	}, [onModeChange]);
 
-	const handleSaveStep = async () => {
+	const handleSaveStep = useCallback(async () => {
 		let updatedSteps;
 		if (mode === 'create') {
 			const newStep = { ...formData, id: String(steps.length + 1) };
@@ -117,33 +154,53 @@ export default function GuideStepsList({
 		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps);
 		setIsModalOpen(false);
 		setFormData(initialFormData);
-		clearLocalStorage();
-	};
+		clearLocalStorage(); // Важно, что clearLocalStorage корректно обновляется
+	}, [
+		mode,
+		formData,
+		steps,
+		currentStepIndex,
+		guideSetId,
+		handleStepsIdListUpdate,
+		clearLocalStorage,
+	]);
 
-	const handleDeleteStep = async stepIndex => {
+	const handleDeleteStep = async (stepIndex: number) => {
 		const updatedSteps = steps.filter((_, index) => index !== stepIndex);
 		setSteps(updatedSteps);
 		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps);
 	};
 
-	const handleFormChange = newFormData => {
-		setFormData(newFormData);
+	const handleFormChange = useCallback(
+		(newFormData: StepType) => {
+			setFormData(newFormData);
 
-		if (mode === 'create') {
-			localStorage.setItem('createFormData', JSON.stringify(newFormData));
-		} else if (mode === 'edit') {
-			const currentStep = steps[currentStepIndex];
-			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
-			localStorage.setItem(editDataKey, JSON.stringify(newFormData));
+			if (steps[currentStepIndex]) {
+				const currentStep = steps[currentStepIndex];
+				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
+
+				if (mode === 'create') {
+					localStorage.setItem('createFormData', JSON.stringify(newFormData));
+				} else if (mode === 'edit') {
+					localStorage.setItem(editDataKey, JSON.stringify(newFormData));
+				}
+			} else {
+				console.error('Current step not found.');
+			}
+		},
+		[mode, steps, currentStepIndex, guideSetId, getEditFormDataKey]
+	);
+
+	const handleEditStep = (stepIndex: number) => {
+		if (steps[stepIndex]) {
+			const selectedStep = steps[stepIndex];
+			setFormData(selectedStep);
+			setCurrentStepIndex(stepIndex);
+			onModeChange('edit');
+			setIsModalOpen(true);
+		} else {
+			console.error('Selected step not found.');
 		}
-	};
-
-	const handleEditStep = stepIndex => {
-		const selectedStep = steps[stepIndex];
-		setFormData(selectedStep);
-		setCurrentStepIndex(stepIndex);
-		onModeChange('edit');
-		setIsModalOpen(true);
 	};
 
 	const handleCancel = () => {
@@ -166,7 +223,7 @@ export default function GuideStepsList({
 		}
 	};
 
-	const highlightElement = elementId => {
+	const highlightElement = (elementId: string) => {
 		const element = document.getElementById(elementId);
 		if (element) {
 			element.classList.add(
@@ -186,7 +243,7 @@ export default function GuideStepsList({
 		}
 	};
 
-	const removeHighlightElement = elementId => {
+	const removeHighlightElement = (elementId: string) => {
 		const element = document.getElementById(elementId);
 		if (element) {
 			element.classList.remove(
@@ -204,9 +261,11 @@ export default function GuideStepsList({
 		if (mode === 'create') {
 			localStorage.setItem('createFormData', JSON.stringify(formData));
 		} else if (mode === 'edit') {
-			const currentStep = steps[currentStepIndex];
-			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
-			localStorage.setItem(editDataKey, JSON.stringify(formData));
+			if (steps[currentStepIndex]) {
+				const currentStep = steps[currentStepIndex];
+				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
+				localStorage.setItem(editDataKey, JSON.stringify(formData));
+			}
 		}
 		setIsModalOpen(false);
 	};
@@ -236,8 +295,8 @@ export default function GuideStepsList({
 						Add: Lesson
 					</Button>
 
-					{isModalOpen && (
-						<Modal onClick={handleCancel} onBackdropClick={handleBackdropClick}>
+					{isModalOpen && (mode === 'create' || mode === 'edit') && (
+						<Modal onClose={handleCancel} onBackdropClick={handleBackdropClick}>
 							<GuideStepForm
 								data={formData}
 								mode={mode}
@@ -254,8 +313,8 @@ export default function GuideStepsList({
 			<ul className='pr-10'>
 				<Reorder.Group
 					values={steps}
-					onReorder={steps => {
-						const updatedSteps = steps.map((step, index) => {
+					onReorder={(newOrder: StepType[]) => {
+						const updatedSteps = newOrder.map((step, index) => {
 							const newStep = {
 								...step,
 								order: index + 1,
@@ -288,6 +347,8 @@ export default function GuideStepsList({
 							top: `${modalPosition.top}px`,
 							left: `${modalPosition.left}px`,
 						}}
+						onBackdropClick={handleCancel} // Обработка клика на backdrop
+						onClose={handleCancel} // Обработка закрытия модального окна
 					>
 						<h3>{steps[currentStepIndex]?.title}</h3>
 						{steps[currentStepIndex]?.imageUrl && (
@@ -316,4 +377,6 @@ export default function GuideStepsList({
 				)}
 		</div>
 	);
-}
+};
+
+export default GuideStepsList;

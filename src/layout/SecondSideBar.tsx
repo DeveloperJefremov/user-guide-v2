@@ -1,6 +1,32 @@
-const SecondSideBar = () => {
-	// Массив элементов с уникальными ID и типами
-	const elements = [
+import { FC } from 'react';
+
+interface ButtonElement {
+	id: string;
+	type: 'button';
+	label: string;
+	onClick: () => void;
+}
+
+interface LinkElement {
+	id: string;
+	type: 'link';
+	label: string;
+	href: string;
+	target: '_blank' | '_self';
+}
+
+interface IconElement {
+	id: string;
+	type: 'icon';
+	icon: string;
+	label: string;
+	onClick: () => void;
+}
+
+type Element = ButtonElement | LinkElement | IconElement; // Общий тип для элементов
+
+const SecondSideBar: FC = () => {
+	const elements: Element[] = [
 		{
 			id: 'btn-5',
 			type: 'button',
@@ -70,12 +96,7 @@ const SecondSideBar = () => {
 				{elements.map(element => (
 					<div key={element.id} className='w-full'>
 						{element.type === 'button' && (
-							<button
-								type='button'
-								id={element.id}
-								onClick={element.onClick}
-								// className='w-full px-4 py-2 bg-primary text-white rounded-md'
-							>
+							<button type='button' id={element.id} onClick={element.onClick}>
 								{element.label}
 							</button>
 						)}

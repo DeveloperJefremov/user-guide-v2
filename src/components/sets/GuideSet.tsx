@@ -1,8 +1,21 @@
-import React, { useState } from 'react';
+import { FC, ReactNode, useCallback, useState } from 'react';
+import { GuideSetType, ModeType } from '../../data/types';
 import Button from '../../UI/Button';
 import GuideStepsList from '../steps/GuideStepsList';
 
-export default function GuideSet({
+interface GuideSetProps {
+	isGuideModalOpen: boolean;
+	onModeChange: (mode: ModeType) => void;
+	mode: ModeType;
+	activeGuideSetId: string | null;
+	onLaunchSet: () => void;
+	guideSet: GuideSetType;
+	handleEditSet: () => void;
+	handleDeleteSet: () => void;
+	handleStepsIdListUpdate: (setId: string, stepId: string) => void;
+}
+
+const GuideSet: FC<GuideSetProps> = ({
 	isGuideModalOpen,
 	onModeChange,
 	mode,
@@ -12,15 +25,12 @@ export default function GuideSet({
 	handleEditSet,
 	handleDeleteSet,
 	handleStepsIdListUpdate,
-}) {
+}) => {
 	const [isShownSet, setIsShownSet] = useState(false);
 
-	if (!guideSet) return null;
-
-	const displayHandler = () => {
-		// Просто переключаем состояние без использования data-атрибута
+	const displayHandler = useCallback(() => {
 		setIsShownSet(prevState => !prevState);
-	};
+	}, []);
 
 	return (
 		<section className='border border-black grid grid-rows-[100px_1fr] p-10 rounded-lg mb-5 bg-white'>
@@ -50,9 +60,17 @@ export default function GuideSet({
 			</div>
 		</section>
 	);
+};
+
+interface GuideSetHeaderProps {
+	isShownSet: boolean;
+	handleEditSet: () => void;
+	handleDeleteSet: () => void;
+	title: string;
+	onDisplayChange: () => void;
 }
 
-const GuideSetHeader = ({
+const GuideSetHeader: FC<GuideSetHeaderProps> = ({
 	isShownSet,
 	handleDeleteSet,
 	handleEditSet,
@@ -80,7 +98,12 @@ const GuideSetHeader = ({
 	);
 };
 
-const GuideSetBody = ({ children, isShownSet }) => {
+interface GuideSetBodyProps {
+	children: ReactNode;
+	isShownSet: boolean;
+}
+
+const GuideSetBody: FC<GuideSetBodyProps> = ({ children, isShownSet }) => {
 	return (
 		<main
 			className={`transition-opacity duration-300 ${
@@ -92,7 +115,15 @@ const GuideSetBody = ({ children, isShownSet }) => {
 	);
 };
 
-const GuideSetFooter = ({ onLaunchSet, isShownSet }) => {
+interface GuideSetFooterProps {
+	onLaunchSet: () => void;
+	isShownSet: boolean;
+}
+
+const GuideSetFooter: FC<GuideSetFooterProps> = ({
+	onLaunchSet,
+	isShownSet,
+}) => {
 	return (
 		<footer
 			className={`${
@@ -107,3 +138,5 @@ const GuideSetFooter = ({ onLaunchSet, isShownSet }) => {
 		</footer>
 	);
 };
+
+export default GuideSet;

@@ -1,5 +1,32 @@
-function FirstSideBar() {
-	const elements = [
+import { FC } from 'react';
+
+interface ButtonElement {
+	id: string;
+	type: 'button';
+	label: string;
+	onClick: () => void;
+}
+
+interface LinkElement {
+	id: string;
+	type: 'link';
+	label: string;
+	href: string;
+	target: '_blank' | '_self';
+}
+
+interface IconElement {
+	id: string;
+	type: 'icon';
+	icon: string;
+	label: string;
+	onClick: () => void;
+}
+
+type Element = ButtonElement | LinkElement | IconElement; // Универсальный тип для элементов
+
+const FirstSideBar: FC = () => {
+	const elements: Element[] = [
 		{
 			id: 'btn-1',
 			type: 'button',
@@ -69,11 +96,7 @@ function FirstSideBar() {
 				{elements.map(element => (
 					<div key={element.id}>
 						{element.type === 'button' && (
-							<button
-								id={element.id}
-								onClick={element.onClick}
-								// className=' bg-primary text-white rounded-md'
-							>
+							<button id={element.id} onClick={element.onClick}>
 								{element.label}
 							</button>
 						)}
@@ -103,6 +126,6 @@ function FirstSideBar() {
 			</div>
 		</aside>
 	);
-}
+};
 
 export default FirstSideBar;

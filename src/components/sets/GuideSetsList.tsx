@@ -1,20 +1,21 @@
 import { Reorder } from 'framer-motion';
-import localforage from 'localforage';
-import { useEffect, useState } from 'react';
+import * as localforage from 'localforage';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { GuideSetType, ModeType } from '../../data/types';
 import Button from '../../UI/Button';
 import Modal from '../../UI/Modal';
 import GuideSet from './GuideSet';
 import GuideSetHeaderForm from './GuideSetHeaderForm';
 
-export default function GuideSetsList() {
-	const [guideSetsList, setGuideSetsList] = useState([]);
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [newSetTitle, setNewSetTitle] = useState('');
-	const [mode, setMode] = useState('display');
-	const [currentSetId, setCurrentSetId] = useState(null);
-	const [activeGuideSetId, setActiveGuideSetId] = useState(null);
-	const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+const GuideSetsList: FC = () => {
+	const [guideSetsList, setGuideSetsList] = useState<GuideSetType[]>([]);
+	const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+	const [newSetTitle, setNewSetTitle] = useState<string>('');
+	const [mode, setMode] = useState<ModeType>('display');
+	const [currentSetId, setCurrentSetId] = useState<string | null>(null);
+	const [activeGuideSetId, setActiveGuideSetId] = useState<string | null>(null);
+	const [isGuideModalOpen, setIsGuideModalOpen] = useState<boolean>(false);
 
 	// Загружаем данные из localStorage при открытии модального окна
 	useEffect(() => {
@@ -38,7 +39,9 @@ export default function GuideSetsList() {
 	// Загружаем данные из LocalForage при монтировании
 	useEffect(() => {
 		const loadData = async () => {
-			const savedGuideSets = await localforage.getItem('guideSets');
+			const savedGuideSets = await localforage.getItem<GuideSetType[]>(
+				'guideSets'
+			);
 			if (savedGuideSets) {
 				setGuideSetsList(savedGuideSets);
 			} else {
@@ -50,7 +53,7 @@ export default function GuideSetsList() {
 	}, []);
 
 	// Функция для обновления stepsIdList
-	const handleStepsIdListUpdate = (setId, stepId) => {
+	const handleStepsIdListUpdate = (setId: string, stepId: string) => {
 		const updatedGuideSetsList = guideSetsList.map(set => {
 			if (set.id === setId) {
 				return {
@@ -75,16 +78,17 @@ export default function GuideSetsList() {
 		}
 	}, [guideSetsList]);
 
-	const handleTitleChange = newTitle => {
-		setNewSetTitle(newTitle);
-
-		// Сохраняем изменения в localStorage
-		if (mode === 'create') {
-			localStorage.setItem('newSetTitle', newTitle);
-		} else if (mode === 'edit') {
-			localStorage.setItem(`editSetTitle_${currentSetId}`, newTitle);
-		}
-	};
+	const handleTitleChange = useCallback(
+		(newTitle: string) => {
+			setNewSetTitle(newTitle);
+			if (mode === 'create') {
+				localStorage.setItem('newSetTitle', newTitle);
+			} else if (mode === 'edit') {
+				localStorage.setItem(`editSetTitle_${currentSetId}`, newTitle);
+			}
+		},
+		[mode, currentSetId]
+	);
 
 	const handleCreateSet = () => {
 		setNewSetTitle('');
@@ -92,21 +96,25 @@ export default function GuideSetsList() {
 		setIsModalOpen(true);
 	};
 
-	const handleLaunchSet = setId => {
+	const handleLaunchSet = (setId: string) => {
 		setIsGuideModalOpen(true);
 		setActiveGuideSetId(setId);
 		setMode('execute');
 	};
 
-	const handleEditSet = id => {
+	const handleEditSet = (id: string) => {
 		const selectedSet = guideSetsList.find(set => set.id === id);
+		if (!selectedSet) {
+			console.error(`Set with id ${id} not found`);
+			return;
+		}
 		setNewSetTitle(selectedSet.setHeader);
 		setCurrentSetId(id);
 		setMode('edit');
 		setIsModalOpen(true);
 	};
 
-	const handleDeleteSet = id => {
+	const handleDeleteSet = (id: string) => {
 		const updatedGuideSetsList = guideSetsList.filter(
 			guideSet => guideSet.id !== id
 		);
@@ -176,8 +184,8 @@ export default function GuideSetsList() {
 						Add: Tutorial
 					</Button>
 
-					{isModalOpen && (
-						<Modal onClick={handleCancel} onBackdropClick={handleBackdropClick}>
+					{isModalOpen && (mode === 'create' || mode === 'edit') && (
+						<Modal onClose={handleCancel} onBackdropClick={handleBackdropClick}>
 							<GuideSetHeaderForm
 								mode={mode}
 								title={newSetTitle}
@@ -209,7 +217,7 @@ export default function GuideSetsList() {
 									onModeChange={newMode => setMode(newMode)}
 									onLaunchSet={() => handleLaunchSet(guideSet.id)}
 									activeGuideSetId={activeGuideSetId}
-									setGuideSetsList={setGuideSetsList}
+									// setGuideSetsList={setGuideSetsList}
 									guideSet={guideSet}
 									handleStepsIdListUpdate={handleStepsIdListUpdate}
 								/>
@@ -220,4 +228,6 @@ export default function GuideSetsList() {
 			</ul>
 		</section>
 	);
-}
+};
+
+export default GuideSetsList;

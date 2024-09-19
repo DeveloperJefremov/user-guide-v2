@@ -1,6 +1,17 @@
-import React from 'react';
+import { ButtonHTMLAttributes, FC, ReactNode } from 'react';
 
-const Button = ({ children, variant = 'default', size = 'md', ...props }) => {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+	children: ReactNode;
+	variant?: 'grey' | 'lightGrey' | 'default';
+	size?: 'icon' | 'sm' | 'md' | 'lg';
+}
+
+const Button: FC<ButtonProps> = ({
+	children,
+	variant = 'default',
+	size = 'md',
+	...props
+}) => {
 	const variantMap = {
 		grey: 'bg-gray-600 text-white hover:opacity-80',
 		lightGrey: 'bg-gray-300 text-black hover:opacity-80',

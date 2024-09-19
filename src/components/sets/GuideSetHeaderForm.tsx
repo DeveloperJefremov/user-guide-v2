@@ -1,6 +1,15 @@
+import { FC } from 'react';
 import Button from '../../UI/Button';
 
-const GuideSetHeaderForm = ({
+interface GuideSetHeaderFormProps {
+	mode: 'create' | 'edit';
+	title: string;
+	onTitleChange: (newTitle: string) => void;
+	onSave: () => void;
+	onCancel: () => void;
+}
+
+const GuideSetHeaderForm: FC<GuideSetHeaderFormProps> = ({
 	mode,
 	title,
 	onTitleChange,
