@@ -103,7 +103,7 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 							setFormData(currentStep);
 						}
 					} else {
-						console.error('Current step not found.');
+						console.error('Current step not found!!!!');
 					}
 				}
 			} catch (error) {
@@ -170,21 +170,22 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 		setSteps(updatedSteps);
 		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps);
 	};
-
 	const handleFormChange = useCallback(
 		(newFormData: StepType) => {
 			setFormData(newFormData);
 
-			if (steps[currentStepIndex]) {
+			// Для режима create мы не работаем с steps[currentStepIndex], так как шаг еще не существует
+			if (mode === 'create') {
+				localStorage.setItem('createFormData', JSON.stringify(newFormData));
+			} else if (
+				mode === 'edit' &&
+				currentStepIndex !== null &&
+				steps[currentStepIndex]
+			) {
 				const currentStep = steps[currentStepIndex];
 				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
-
-				if (mode === 'create') {
-					localStorage.setItem('createFormData', JSON.stringify(newFormData));
-				} else if (mode === 'edit') {
-					localStorage.setItem(editDataKey, JSON.stringify(newFormData));
-				}
-			} else {
+				localStorage.setItem(editDataKey, JSON.stringify(newFormData));
+			} else if (mode === 'edit' && !steps[currentStepIndex]) {
 				console.error('Current step not found.');
 			}
 		},

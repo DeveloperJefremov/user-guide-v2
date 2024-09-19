@@ -1,4 +1,4 @@
-import { FC, ReactNode, useCallback, useState } from 'react';
+import { ChangeEvent, FC, ReactNode, useCallback, useState } from 'react';
 import { GuideSetType, ModeType } from '../../data/types';
 import Button from '../../UI/Button';
 import GuideStepsList from '../steps/GuideStepsList';
@@ -79,9 +79,41 @@ const GuideSetHeader: FC<GuideSetHeaderProps> = ({
 }) => {
 	let displayButtonText = !isShownSet ? '+' : '-';
 
+	const [status, setStatus] = useState<string>('');
+	const [isOn, setIsOn] = useState<boolean>(false);
+
+	const handleStatusChange = (e: ChangeEvent<HTMLSelectElement>) => {
+		setStatus(e.target.value);
+	};
+	const handleToggleOnOff = () => {
+		setIsOn(prev => !prev); // Переключение состояния
+	};
 	return (
 		<header className='flex justify-between items-center'>
-			<h3>{title}</h3>
+			<div className='flex justify-between items-center'>
+				<h3>{title}</h3>
+
+				<div className='flex items-center ml-8'>
+					<select
+						value={status}
+						onChange={handleStatusChange}
+						className='mr-4 border-2 border-clack    bg-primary-foreground text-black'
+					>
+						<option value='empty'></option>
+						<option value='draft'>Draft</option>
+						<option value='under review'>Under Review</option>
+						<option value='completed'>Completed</option>
+					</select>
+
+					{status === 'completed' && (
+						<div>
+							<Button onClick={handleToggleOnOff} variant='lightGrey' size='lg'>
+								{isOn ? 'Off' : 'On'}
+							</Button>
+						</div>
+					)}
+				</div>
+			</div>
 			<div className='flex gap-7 items-center pr-2.5'>
 				<Button onClick={handleEditSet} variant='lightGrey' size='lg'>
 					Edit: Tutorial

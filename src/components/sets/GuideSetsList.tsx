@@ -114,11 +114,18 @@ const GuideSetsList: FC = () => {
 		setIsModalOpen(true);
 	};
 
-	const handleDeleteSet = (id: string) => {
+	const handleDeleteSet = async (setId: string) => {
+		// Удаляем сет
 		const updatedGuideSetsList = guideSetsList.filter(
-			guideSet => guideSet.id !== id
+			guideSet => guideSet.id !== setId
 		);
 		setGuideSetsList(updatedGuideSetsList);
+
+		// Удаляем все шаги, связанные с этим сетом
+		await localforage.removeItem(`guideSteps_${setId}`);
+
+		// Дополнительно, если у тебя есть шаги в LocalStorage, можно удалить их:
+		localStorage.removeItem(`editFormData_${setId}`);
 	};
 
 	const handleSaveNewSet = () => {
@@ -179,7 +186,7 @@ const GuideSetsList: FC = () => {
 		<section className='pt-4 flex flex-col justify-center'>
 			<header className='flex flex-row-reverse justify-between items-center'>
 				<section className='flex-shrink-0 p-3 flex flex-col'>
-					<h2>Create New Set</h2>
+					<h2>Create New Tutorial</h2>
 					<Button onClick={handleCreateSet} variant='lightGrey' size='lg'>
 						Add: Tutorial
 					</Button>
