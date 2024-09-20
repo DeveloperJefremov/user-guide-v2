@@ -17,25 +17,6 @@ const GuideSetsList: FC = () => {
 	const [activeGuideSetId, setActiveGuideSetId] = useState<string | null>(null);
 	const [isGuideModalOpen, setIsGuideModalOpen] = useState<boolean>(false);
 
-	// Загружаем данные из localStorage при открытии модального окна
-	useEffect(() => {
-		if (isModalOpen) {
-			if (mode === 'create') {
-				const savedNewSetTitle = localStorage.getItem('newSetTitle');
-				if (savedNewSetTitle) {
-					setNewSetTitle(savedNewSetTitle);
-				}
-			} else if (mode === 'edit' && currentSetId) {
-				const savedEditSetTitle = localStorage.getItem(
-					`editSetTitle_${currentSetId}`
-				);
-				if (savedEditSetTitle) {
-					setNewSetTitle(savedEditSetTitle);
-				}
-			}
-		}
-	}, [isModalOpen, mode, currentSetId]);
-
 	// Загружаем данные из LocalForage при монтировании
 	useEffect(() => {
 		const loadData = async () => {
@@ -124,6 +105,9 @@ const GuideSetsList: FC = () => {
 		// Удаляем все шаги, связанные с этим сетом
 		await localforage.removeItem(`guideSteps_${setId}`);
 
+		// Удаляем данные из localStorage, связанные с этим сетом
+		localStorage.removeItem(`editSetTitle_${setId}`);
+
 		// Дополнительно, если у тебя есть шаги в LocalStorage, можно удалить их:
 		localStorage.removeItem(`editFormData_${setId}`);
 	};
@@ -196,6 +180,7 @@ const GuideSetsList: FC = () => {
 							<GuideSetHeaderForm
 								mode={mode}
 								title={newSetTitle}
+								currentSetId={currentSetId}
 								onTitleChange={handleTitleChange}
 								onSave={handleSaveNewSet}
 								onCancel={handleCancel}
