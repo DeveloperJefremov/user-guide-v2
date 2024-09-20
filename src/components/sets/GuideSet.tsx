@@ -1,7 +1,13 @@
-import { ChangeEvent, FC, ReactNode, useCallback, useState } from 'react';
+import { DevTool } from '@hookform/devtools';
+import { FC, ReactNode, useCallback, useState } from 'react';
+import { useForm } from 'react-hook-form'; // Импортируем useForm из react-hook-form
 import { GuideSetType, ModeType } from '../../data/types';
 import Button from '../../UI/Button';
 import GuideStepsList from '../steps/GuideStepsList';
+
+interface GuideSetFormData {
+	status: string;
+}
 
 interface GuideSetProps {
 	isGuideModalOpen: boolean;
@@ -79,33 +85,45 @@ const GuideSetHeader: FC<GuideSetHeaderProps> = ({
 }) => {
 	let displayButtonText = !isShownSet ? '+' : '-';
 
-	const [status, setStatus] = useState<string>('');
 	const [isOn, setIsOn] = useState<boolean>(false);
 
-	const handleStatusChange = (e: ChangeEvent<HTMLSelectElement>) => {
-		setStatus(e.target.value);
-	};
+	const { register, handleSubmit, watch, control } = useForm<GuideSetFormData>({
+		defaultValues: { status: '' },
+	}); // Инициализация useForm
+
 	const handleToggleOnOff = () => {
 		setIsOn(prev => !prev); // Переключение состояния
 	};
+
+	const onSubmit = (data: GuideSetFormData) => {
+		console.log('Submitted status:', data.status);
+	};
+
 	return (
 		<header className='flex justify-between items-center'>
 			<div className='flex justify-between items-center'>
 				<h3>{title}</h3>
 
 				<div className='flex items-center ml-8'>
-					<select
-						value={status}
-						onChange={handleStatusChange}
-						className='mr-4 border-2 border-clack    bg-primary-foreground text-black'
-					>
-						<option value='empty'></option>
-						<option value='draft'>Draft</option>
-						<option value='under review'>Under Review</option>
-						<option value='completed'>Completed</option>
-					</select>
+					<form onSubmit={handleSubmit(onSubmit)}>
+						<select
+							{...register('status')} // Регистрируем поле select
+							className='mr-4 border-2 border-clack bg-primary-foreground text-black'
+						>
+							<option value='empty'></option>
+							<option value='draft'>Draft</option>
+							<option value='under review'>Under Review</option>
+							<option value='completed'>Completed</option>
+						</select>
 
-					{status === 'completed' && (
+						{/* <Button type='submit' variant='default' size='md'>
+							Save Status
+						</Button> */}
+					</form>
+					<DevTool control={control} />
+
+					{/* Показать кнопку, если статус "completed" */}
+					{watch('status') === 'completed' && (
 						<div>
 							<Button onClick={handleToggleOnOff} variant='lightGrey' size='lg'>
 								{isOn ? 'Off' : 'On'}

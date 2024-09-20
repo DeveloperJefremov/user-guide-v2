@@ -102,13 +102,19 @@ const GuideSetsList: FC = () => {
 		);
 		setGuideSetsList(updatedGuideSetsList);
 
-		// Удаляем все шаги, связанные с этим сетом
+		// Удаляем все шаги, связанные с этим сетом из localforage
 		await localforage.removeItem(`guideSteps_${setId}`);
 
-		// Удаляем данные из localStorage, связанные с этим сетом
+		// Удаляем данные, связанные с сетом, из localStorage
 		localStorage.removeItem(`editSetTitle_${setId}`);
+		localStorage.removeItem('createFormData');
 
-		localStorage.removeItem(`createFormData`);
+		// Удаляем все ключи, начинающиеся с "editFormData_{setId}_"
+		Object.keys(localStorage).forEach(key => {
+			if (key.startsWith(`editFormData_${setId}_`)) {
+				localStorage.removeItem(key);
+			}
+		});
 	};
 
 	const handleSaveNewSet = () => {
@@ -208,7 +214,6 @@ const GuideSetsList: FC = () => {
 									onModeChange={newMode => setMode(newMode)}
 									onLaunchSet={() => handleLaunchSet(guideSet.id)}
 									activeGuideSetId={activeGuideSetId}
-									// setGuideSetsList={setGuideSetsList}
 									guideSet={guideSet}
 									handleStepsIdListUpdate={handleStepsIdListUpdate}
 								/>

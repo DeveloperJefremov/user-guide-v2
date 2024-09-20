@@ -1,3 +1,4 @@
+import { DevTool } from '@hookform/devtools';
 import { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Button from '../../UI/Button';
@@ -19,7 +20,7 @@ const GuideSetHeaderForm: FC<GuideSetHeaderFormProps> = ({
 	onSave,
 	onCancel,
 }) => {
-	const { register, handleSubmit, setValue, watch } = useForm();
+	const { register, handleSubmit, setValue, watch, control } = useForm();
 
 	const watchedTitle = watch('title', '');
 
@@ -55,28 +56,33 @@ const GuideSetHeaderForm: FC<GuideSetHeaderFormProps> = ({
 	}, [watchedTitle, mode, currentSetId, onTitleChange]);
 
 	return (
-		<form
-			onSubmit={handleSubmit(onSave)}
-			className='p-5 bg-gray-100 rounded-lg shadow-md flex flex-col'
-		>
-			<label htmlFor='titleInput' className='text-lg mb-2'>
-				{mode === 'edit' ? 'Edit Tutorial Title' : 'Create New Tutorial Title'}
-			</label>
-			<input
-				id='titleInput'
-				{...register('title', { required: true })}
-				className='p-3 text-base border border-gray-300 rounded focus:border-blue-500 mb-5'
-				placeholder='Enter title'
-			/>
-			<div className='flex justify-end gap-3'>
-				<Button onClick={onCancel} variant='lightGrey' size='lg'>
-					Cancel
-				</Button>
-				<Button type='submit' variant='default' size='lg'>
-					Save
-				</Button>
-			</div>
-		</form>
+		<>
+			<form
+				onSubmit={handleSubmit(onSave)}
+				className='p-5 bg-gray-100 rounded-lg shadow-md flex flex-col'
+			>
+				<label htmlFor='titleInput' className='text-lg mb-2'>
+					{mode === 'edit'
+						? 'Edit Tutorial Title'
+						: 'Create New Tutorial Title'}
+				</label>
+				<input
+					id='titleInput'
+					{...register('title', { required: true })}
+					className='p-3 text-base border border-gray-300 rounded focus:border-blue-500 mb-5'
+					placeholder='Enter title'
+				/>
+				<div className='flex justify-end gap-3'>
+					<Button onClick={onCancel} variant='lightGrey' size='lg'>
+						Cancel
+					</Button>
+					<Button type='submit' variant='default' size='lg'>
+						Save
+					</Button>
+				</div>
+			</form>
+			<DevTool control={control} />
+		</>
 	);
 };
 

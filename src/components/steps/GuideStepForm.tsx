@@ -1,7 +1,36 @@
+import { DevTool } from '@hookform/devtools';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ChangeEvent, FC, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { StepType } from '../../data/types';
 import Button from '../../UI/Button';
+
+// Схема валидации с Zod
+const guideStepSchema = z.object({
+	title: z.string().min(1, { message: 'Title is required' }),
+	order: z
+		.string()
+		.min(1, { message: 'Order is required' })
+		.transform(val => parseInt(val, 10)), // Преобразуем строку в число
+	description: z.string().min(1, { message: 'Description is required' }),
+	pageUrl: z.string().url({ message: 'Invalid URL format' }),
+	elementId: z.string().min(1, { message: 'Element ID is required' }),
+	imgChecked: z.boolean(),
+	imgWidth: z
+		.union([z.string(), z.number()])
+		.optional()
+		.transform(val => (typeof val === 'string' ? parseInt(val, 10) : val)), // Преобразуем строку в число
+	imgHeight: z
+		.union([z.string(), z.number()])
+		.optional()
+		.transform(val => (typeof val === 'string' ? parseInt(val, 10) : val)), // Преобразуем строку в число
+	imageUrl: z
+		.string()
+		.url({ message: 'Invalid image URL' })
+		.optional()
+		.or(z.literal('')),
+});
 
 interface GuideStepFormProps {
 	data: StepType;
@@ -18,7 +47,16 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 	handleSaveStep,
 	handleCancel,
 }) => {
-	const { register, handleSubmit, watch, setValue, reset } = useForm<StepType>({
+	const {
+		register,
+		handleSubmit,
+		watch,
+		setValue,
+		reset,
+		control,
+		formState: { errors },
+	} = useForm<StepType>({
+		resolver: zodResolver(guideStepSchema),
 		defaultValues: data,
 	});
 
@@ -31,11 +69,18 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 
 	const formValues = watch();
 
+	// Автофокус на поле Title
+	useEffect(() => {
+		const firstField = document.getElementById('title');
+		if (firstField) {
+			firstField.focus();
+		}
+	}, []);
+
 	// Избегаем бесконечного цикла обновления
 	useEffect(() => {
 		if (JSON.stringify(formValues) !== JSON.stringify(prevFormValues.current)) {
 			prevFormValues.current = formValues;
-
 			onChange(formValues);
 		}
 	}, [formValues, mode, data.id, onChange]);
@@ -81,6 +126,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					{...register('title')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
+				{errors.title && <p className='text-red-500'>{errors.title.message}</p>}
 
 				{/* Поле Order */}
 				<label htmlFor='order' className='block'>
@@ -93,6 +139,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					{...register('order')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
+				{errors.order && <p className='text-red-500'>{errors.order.message}</p>}
 
 				{/* Поле Description */}
 				<label htmlFor='description' className='block'>
@@ -104,6 +151,9 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					{...register('description')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
+				{errors.description && (
+					<p className='text-red-500'>{errors.description.message}</p>
+				)}
 
 				{/* Поле Page URL */}
 				<label htmlFor='pageUrl' className='block'>
@@ -115,6 +165,9 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					{...register('pageUrl')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
+				{errors.pageUrl && (
+					<p className='text-red-500'>{errors.pageUrl.message}</p>
+				)}
 
 				{/* Поле Element ID */}
 				<label htmlFor='elementId' className='block'>
@@ -126,6 +179,9 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					{...register('elementId')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
+				{errors.elementId && (
+					<p className='text-red-500'>{errors.elementId.message}</p>
+				)}
 
 				{/* Поле для изображения */}
 				<fieldset className='flex flex-col'>
@@ -154,6 +210,9 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 								disabled={mode !== 'create' && mode !== 'edit'}
 								className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 							/>
+							{errors.imgWidth && (
+								<p className='text-red-500'>{errors.imgWidth.message}</p>
+							)}
 
 							<label htmlFor='imgHeight' className='block'>
 								Image Height:
@@ -166,6 +225,9 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 								disabled={mode !== 'create' && mode !== 'edit'}
 								className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 							/>
+							{errors.imgHeight && (
+								<p className='text-red-500'>{errors.imgHeight.message}</p>
+							)}
 
 							{formValues.imageUrl && (
 								<img
@@ -192,6 +254,8 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					</Button>
 				</div>
 			</form>
+
+			<DevTool control={control} />
 		</div>
 	);
 };

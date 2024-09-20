@@ -44,6 +44,7 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 		top: number;
 		left: number;
 	}>({ top: 0, left: 0 });
+
 	const [formData, setFormData] = useState<StepType>(initialFormData);
 
 	const getEditFormDataKey = useCallback(
@@ -150,7 +151,6 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 			);
 		}
 
-		// Сортируем шаги перед обновлением
 		const sortedUpdatedSteps = updatedSteps.sort((a, b) => a.order - b.order);
 
 		setSteps(sortedUpdatedSteps);
@@ -176,8 +176,6 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 	const handleFormChange = useCallback(
 		(newFormData: StepType) => {
 			setFormData(newFormData);
-
-			// Для режима create мы не работаем с steps[currentStepIndex], так как шаг еще не существует
 			if (mode === 'create') {
 				localStorage.setItem('createFormData', JSON.stringify(newFormData));
 			} else if (
