@@ -1,4 +1,5 @@
 import { FC, useCallback, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { StepType } from '../../data/types';
 import Button from '../../UI/Button';
 
@@ -77,6 +78,11 @@ interface GuideStepBodyProps {
 }
 
 const GuideStepBody: FC<GuideStepBodyProps> = ({ step }) => {
+	// Используем react-hook-form для управления полями, которые только отображаются
+	const { register } = useForm<StepType>({
+		defaultValues: step,
+	});
+
 	return (
 		<section className='transition-all duration-300 max-h-screen opacity-100 flex justify-center items-start p-8'>
 			<article className='flex justify-between gap-10 max-w-4xl w-full'>
@@ -87,7 +93,7 @@ const GuideStepBody: FC<GuideStepBodyProps> = ({ step }) => {
 							<textarea
 								id='description'
 								className='border h-24 p-2 rounded mb-2 w-full resize-none'
-								value={step.description}
+								{...register('description')}
 								disabled
 							/>
 						</label>
@@ -99,7 +105,7 @@ const GuideStepBody: FC<GuideStepBodyProps> = ({ step }) => {
 								id='pageUrl'
 								className='border p-2 rounded mb-2 w-full'
 								type='text'
-								value={step.pageUrl}
+								{...register('pageUrl')}
 								disabled
 							/>
 						</label>
@@ -111,12 +117,13 @@ const GuideStepBody: FC<GuideStepBodyProps> = ({ step }) => {
 								id='elementId'
 								className='border p-2 rounded mb-2 w-full'
 								type='text'
-								value={step.elementId}
+								{...register('elementId')}
 								disabled
 							/>
 						</label>
 					)}
 				</form>
+
 				{step.imgChecked && step.imageUrl && (
 					<fieldset className='flex flex-col items-center gap-4'>
 						<legend>Image Section</legend>
@@ -126,7 +133,7 @@ const GuideStepBody: FC<GuideStepBodyProps> = ({ step }) => {
 								id='imgWidth'
 								type='number'
 								className='border p-2 rounded w-full'
-								value={step.imgWidth}
+								{...register('imgWidth')}
 								disabled
 							/>
 						</label>
@@ -136,7 +143,7 @@ const GuideStepBody: FC<GuideStepBodyProps> = ({ step }) => {
 								id='imgHeight'
 								type='number'
 								className='border p-2 rounded w-full'
-								value={step.imgHeight}
+								{...register('imgHeight')}
 								disabled
 							/>
 						</label>
@@ -144,8 +151,10 @@ const GuideStepBody: FC<GuideStepBodyProps> = ({ step }) => {
 							className='border rounded max-w-full'
 							src={step.imageUrl}
 							alt={step.title}
-							width={step.imgWidth}
-							height={step.imgHeight}
+							style={{
+								width: `${step.imgWidth}px`,
+								height: `${step.imgHeight}px`,
+							}} // Используем прямое управление стилями для точного отображения размеров
 						/>
 					</fieldset>
 				)}

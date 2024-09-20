@@ -1,11 +1,12 @@
-import { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
-import { StepType } from '../../data/types'; // Используем StepType вместо FormData
+import { ChangeEvent, FC, useEffect, useRef } from 'react';
+import { useForm } from 'react-hook-form';
+import { StepType } from '../../data/types';
 import Button from '../../UI/Button';
 
 interface GuideStepFormProps {
-	data: StepType; // Используем StepType
+	data: StepType;
 	mode: 'create' | 'edit' | 'view';
-	onChange: (updatedData: StepType) => void; // Используем StepType
+	onChange: (updatedData: StepType) => void;
 	handleSaveStep: () => void;
 	handleCancel: () => void;
 }
@@ -17,79 +18,58 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 	handleSaveStep,
 	handleCancel,
 }) => {
-	const initialData = useMemo<StepType>(
-		() => ({
-			id: '',
-			title: '',
-			order: 0,
-			description: '',
-			pageUrl: '',
-			elementId: '',
-			imgChecked: false,
-			imgWidth: 0,
-			imgHeight: 0,
-			imageUrl: '',
-		}),
-		[]
-	);
-	const [formData, setFormData] = useState<StepType>(
-		mode === 'edit' ? data : initialData
-	);
+	const { register, handleSubmit, watch, setValue, reset } = useForm<StepType>({
+		defaultValues: data,
+	});
 
+	const prevFormValues = useRef<StepType>(data);
+
+	// Сброс формы при изменении data
 	useEffect(() => {
-		if (mode === 'edit' || mode === 'create') {
-			setFormData(data ?? initialData);
-		}
-	}, [data, mode, initialData]);
+		reset(data);
+	}, [data, reset]);
 
-	const handleInputChange = (
-		e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-	) => {
-		const { name, value, type } = e.target;
-		const updatedFormData = {
-			...formData,
-			[name]:
-				type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-		};
-		setFormData(updatedFormData);
-		onChange(updatedFormData);
+	const formValues = watch();
+
+	// Избегаем бесконечного цикла обновления
+	useEffect(() => {
+		if (JSON.stringify(formValues) !== JSON.stringify(prevFormValues.current)) {
+			prevFormValues.current = formValues;
+
+			onChange(formValues);
+		}
+	}, [formValues, mode, data.id, onChange]);
+
+	const onSubmit = () => {
+		handleSaveStep();
 	};
 
+	// Логика для загрузки случайной картинки
 	const handleImgCheckboxChange = async (e: ChangeEvent<HTMLInputElement>) => {
 		const checked = e.target.checked;
-		let updatedData = { ...formData, imgChecked: checked };
 
+		setValue('imgChecked', checked);
 		if (checked) {
 			try {
 				const response = await fetch('https://dog.ceo/api/breeds/image/random');
-				const data: { message: string } = await response.json();
-				if (data && data.message) {
-					updatedData = {
-						...updatedData,
-						imageUrl: data.message,
-						imgWidth: 100,
-						imgHeight: 100,
-					};
-				}
+				const result = await response.json();
+				setValue('imageUrl', result.message); // Устанавливаем URL изображения
+				setValue('imgWidth', 100); // Устанавливаем ширину по умолчанию
+				setValue('imgHeight', 100); // Устанавливаем высоту по умолчанию
 			} catch (error) {
 				console.error('Ошибка при получении изображения:', error);
 			}
 		} else {
-			updatedData = {
-				...updatedData,
-				imageUrl: '',
-				imgWidth: 0,
-				imgHeight: 0,
-			};
+			// Сбрасываем поля, если чекбокс отключен
+			setValue('imageUrl', '');
+			setValue('imgWidth', 0);
+			setValue('imgHeight', 0);
 		}
-
-		setFormData(updatedData);
-		onChange(updatedData);
 	};
 
 	return (
 		<div className='flex flex-col gap-5 p-5'>
-			<form className='flex flex-col gap-4'>
+			<form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
 				{/* Поле Title */}
 				<label htmlFor='title' className='block'>
 					Title:
@@ -98,9 +78,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					id='title'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					type='text'
-					name='title'
-					value={formData.title}
-					onChange={handleInputChange}
+					{...register('title')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
@@ -112,9 +90,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					id='order'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					type='number'
-					name='order'
-					value={formData.order}
-					onChange={handleInputChange}
+					{...register('order')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
@@ -125,9 +101,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 				<textarea
 					id='description'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none h-32'
-					name='description'
-					value={formData.description}
-					onChange={handleInputChange}
+					{...register('description')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
@@ -138,9 +112,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 				<input
 					id='pageUrl'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
-					name='pageUrl'
-					value={formData.pageUrl}
-					onChange={handleInputChange}
+					{...register('pageUrl')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 
@@ -151,82 +123,75 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 				<input
 					id='elementId'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
-					type='text'
-					name='elementId'
-					value={formData.elementId}
-					onChange={handleInputChange}
+					{...register('elementId')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
+
+				{/* Поле для изображения */}
+				<fieldset className='flex flex-col'>
+					<legend>Image Settings</legend>
+					<label htmlFor='imgChecked' className='block'>
+						Image:
+					</label>
+					<input
+						id='imgChecked'
+						type='checkbox'
+						{...register('imgChecked')}
+						disabled={mode !== 'create' && mode !== 'edit'}
+						onChange={handleImgCheckboxChange}
+					/>
+
+					{formValues.imgChecked && (
+						<>
+							<label htmlFor='imgWidth' className='block'>
+								Image Width:
+							</label>
+							<input
+								id='imgWidth'
+								type='number'
+								min='1'
+								{...register('imgWidth')}
+								disabled={mode !== 'create' && mode !== 'edit'}
+								className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
+							/>
+
+							<label htmlFor='imgHeight' className='block'>
+								Image Height:
+							</label>
+							<input
+								id='imgHeight'
+								type='number'
+								min='1'
+								{...register('imgHeight')}
+								disabled={mode !== 'create' && mode !== 'edit'}
+								className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
+							/>
+
+							{formValues.imageUrl && (
+								<img
+									src={formValues.imageUrl}
+									alt={formValues.title}
+									style={{
+										width: `${formValues.imgWidth}px`,
+										height: `${formValues.imgHeight}px`,
+									}}
+									className='mt-4'
+								/>
+							)}
+						</>
+					)}
+				</fieldset>
+
+				{/* Кнопки сохранения/отмены */}
+				<div className='flex justify-end gap-4 pt-5'>
+					<Button variant='lightGrey' size='md' onClick={handleCancel}>
+						Cancel
+					</Button>
+					<Button variant='default' size='md' type='submit'>
+						Save
+					</Button>
+				</div>
 			</form>
-
-			{/* Настройки изображения */}
-			<fieldset className='flex flex-col'>
-				<legend>Image Settings</legend>
-				<label htmlFor='imgChecked' className='block'>
-					Image:
-				</label>
-				<input
-					id='imgChecked'
-					name='imgChecked'
-					type='checkbox'
-					checked={formData.imgChecked}
-					onChange={handleImgCheckboxChange}
-					disabled={mode !== 'create' && mode !== 'edit'}
-				/>
-
-				{formData.imgChecked && formData.imageUrl && (
-					<>
-						{/* Поле Image Width */}
-						<label htmlFor='imgWidth' className='block'>
-							Image Width:
-						</label>
-						<input
-							id='imgWidth'
-							type='number'
-							name='imgWidth'
-							min='1'
-							value={formData.imgWidth}
-							onChange={handleInputChange}
-							disabled={mode !== 'create' && mode !== 'edit'}
-							className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
-						/>
-
-						{/* Поле Image Height */}
-						<label htmlFor='imgHeight' className='block'>
-							Image Height:
-						</label>
-						<input
-							id='imgHeight'
-							type='number'
-							name='imgHeight'
-							min='1'
-							value={formData.imgHeight}
-							onChange={handleInputChange}
-							disabled={mode !== 'create' && mode !== 'edit'}
-							className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
-						/>
-						<img
-							className='mt-4'
-							src={formData.imageUrl}
-							alt={formData.title}
-							style={{
-								width: `${formData.imgWidth}px`,
-								height: `${formData.imgHeight}px`,
-							}}
-						/>
-					</>
-				)}
-			</fieldset>
-
-			{/* Кнопки сохранения/отмены */}
-			<div className='flex justify-end gap-4 pt-5'>
-				<Button variant='lightGrey' size='md' onClick={handleCancel}>
-					Cancel
-				</Button>
-				<Button variant='default' size='md' onClick={handleSaveStep}>
-					Save
-				</Button>
-			</div>
 		</div>
 	);
 };

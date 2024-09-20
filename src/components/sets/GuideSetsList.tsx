@@ -108,8 +108,7 @@ const GuideSetsList: FC = () => {
 		// Удаляем данные из localStorage, связанные с этим сетом
 		localStorage.removeItem(`editSetTitle_${setId}`);
 
-		// Дополнительно, если у тебя есть шаги в LocalStorage, можно удалить их:
-		localStorage.removeItem(`editFormData_${setId}`);
+		localStorage.removeItem(`createFormData`);
 	};
 
 	const handleSaveNewSet = () => {

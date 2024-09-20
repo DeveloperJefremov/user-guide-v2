@@ -150,11 +150,14 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 			);
 		}
 
-		setSteps(updatedSteps);
-		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps);
+		// Сортируем шаги перед обновлением
+		const sortedUpdatedSteps = updatedSteps.sort((a, b) => a.order - b.order);
+
+		setSteps(sortedUpdatedSteps);
+		await localforage.setItem(`guideSteps_${guideSetId}`, sortedUpdatedSteps);
 		setIsModalOpen(false);
 		setFormData(initialFormData);
-		clearLocalStorage(); // Важно, что clearLocalStorage корректно обновляется
+		clearLocalStorage();
 	}, [
 		mode,
 		formData,
@@ -318,12 +321,15 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 						const updatedSteps = newOrder.map((step, index) => {
 							const newStep = {
 								...step,
-								order: index + 1,
+								order: index + 1, // Присваиваем новое значение order
 							};
 							return newStep;
 						});
 
-						setSteps(updatedSteps);
+						// Сортируем шаги и сохраняем их
+						const sortedSteps = updatedSteps.sort((a, b) => a.order - b.order);
+						setSteps(sortedSteps);
+						localforage.setItem(`guideSteps_${guideSetId}`, sortedSteps);
 					}}
 				>
 					{steps.map((step, stepIndex) => (
