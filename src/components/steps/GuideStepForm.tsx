@@ -1,6 +1,6 @@
 import { DevTool } from '@hookform/devtools';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChangeEvent, FC, useEffect, useRef } from 'react';
+import React, { ChangeEvent, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { StepType } from '../../data/types';
@@ -9,10 +9,7 @@ import Button from '../../UI/Button';
 // Схема валидации с Zod
 const guideStepSchema = z.object({
 	title: z.string().min(1, { message: 'Title is required' }),
-	order: z
-		.string()
-		.min(1, { message: 'Order is required' })
-		.transform(val => parseInt(val, 10)), // Преобразуем строку в число
+	order: z.number().min(1, { message: 'Order is required' }),
 	description: z.string().min(1, { message: 'Description is required' }),
 	pageUrl: z.string().url({ message: 'Invalid URL format' }),
 	elementId: z.string().min(1, { message: 'Element ID is required' }),
@@ -35,18 +32,18 @@ const guideStepSchema = z.object({
 interface GuideStepFormProps {
 	data: StepType;
 	mode: 'create' | 'edit' | 'view';
-	onChange: (updatedData: StepType) => void;
-	handleSaveStep: () => void;
-	handleCancel: () => void;
+	// onChange: (updatedData: StepType) => void;
+	onSave: (step: StepType) => void;
+	onCancel: () => void;
 }
 
-const GuideStepForm: FC<GuideStepFormProps> = ({
+const GuideStepForm = ({
 	data,
 	mode,
-	onChange,
-	handleSaveStep,
-	handleCancel,
-}) => {
+	// onChange,
+	onSave,
+	onCancel,
+}: GuideStepFormProps) => {
 	const {
 		register,
 		handleSubmit,
@@ -60,7 +57,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 		defaultValues: data,
 	});
 
-	const prevFormValues = useRef<StepType>(data);
+	// const prevFormValues = useRef<StepType>(data);
 
 	// Сброс формы при изменении data
 	useEffect(() => {
@@ -70,23 +67,36 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 	const formValues = watch();
 
 	// Автофокус на поле Title
-	useEffect(() => {
-		const firstField = document.getElementById('title');
-		if (firstField) {
-			firstField.focus();
-		}
-	}, []);
+	// useEffect(() => {
+	// 	const firstField = document.getElementById('title');
+	// 	if (firstField) {
+	// 		firstField.focus();
+	// 	}
+	// }, []);
 
 	// Избегаем бесконечного цикла обновления
-	useEffect(() => {
-		if (JSON.stringify(formValues) !== JSON.stringify(prevFormValues.current)) {
-			prevFormValues.current = formValues;
-			onChange(formValues);
-		}
-	}, [formValues, mode, data.id, onChange]);
+	// useEffect(() => {
+	// 	if (JSON.stringify(formValues) !== JSON.stringify(prevFormValues.current)) {
+	// 		prevFormValues.current = formValues;
+	// 		onChange(formValues);
+	// 	}
+	// }, [formValues, mode, data.id]);
 
-	const onSubmit = () => {
-		handleSaveStep();
+	const handleSave = (step: StepType) => {
+		onSave(step);
+		reset(data);
+	};
+
+	const keyDownHandler = (event: React.KeyboardEvent<HTMLFormElement>) => {
+		const key = event.key;
+		if (key === 'Enter') {
+			event.preventDefault();
+		}
+	};
+
+	const handleCancel = () => {
+		reset(data);
+		onCancel();
 	};
 
 	// Логика для загрузки случайной картинки
@@ -114,7 +124,11 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 
 	return (
 		<div className='flex flex-col gap-5 p-5'>
-			<form className='flex flex-col gap-4' onSubmit={handleSubmit(onSubmit)}>
+			<form
+				className='flex flex-col gap-4'
+				onSubmit={handleSubmit(handleSave)}
+				onKeyDown={keyDownHandler}
+			>
 				{/* Поле Title */}
 				<label htmlFor='title' className='block'>
 					Title:
@@ -123,6 +137,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 					id='title'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					type='text'
+					placeholder='Enter title'
 					{...register('title')}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
@@ -134,9 +149,12 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 				</label>
 				<input
 					id='order'
+					placeholder='Enter order'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					type='number'
-					{...register('order')}
+					{...register('order', {
+						valueAsNumber: true,
+					})}
 					disabled={mode !== 'create' && mode !== 'edit'}
 				/>
 				{errors.order && <p className='text-red-500'>{errors.order.message}</p>}
@@ -147,6 +165,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 				</label>
 				<textarea
 					id='description'
+					placeholder='Enter description'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none h-32'
 					{...register('description')}
 					disabled={mode !== 'create' && mode !== 'edit'}
@@ -161,6 +180,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 				</label>
 				<input
 					id='pageUrl'
+					placeholder='Enter page Url'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					{...register('pageUrl')}
 					disabled={mode !== 'create' && mode !== 'edit'}
@@ -175,6 +195,7 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 				</label>
 				<input
 					id='elementId'
+					placeholder='Enter element Id'
 					className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 					{...register('elementId')}
 					disabled={mode !== 'create' && mode !== 'edit'}
@@ -205,8 +226,11 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 							<input
 								id='imgWidth'
 								type='number'
+								placeholder='Enter image width'
 								min='1'
-								{...register('imgWidth')}
+								{...register('imgWidth', {
+									valueAsNumber: true,
+								})}
 								disabled={mode !== 'create' && mode !== 'edit'}
 								className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 							/>
@@ -220,8 +244,11 @@ const GuideStepForm: FC<GuideStepFormProps> = ({
 							<input
 								id='imgHeight'
 								type='number'
+								placeholder='Enter image height'
 								min='1'
-								{...register('imgHeight')}
+								{...register('imgHeight', {
+									valueAsNumber: true,
+								})}
 								disabled={mode !== 'create' && mode !== 'edit'}
 								className='resize-none border border-gray-300 rounded-md p-2 text-lg w-full focus:border-blue-500 focus:outline-none'
 							/>

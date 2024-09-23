@@ -173,25 +173,26 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 		setSteps(updatedSteps);
 		await localforage.setItem(`guideSteps_${guideSetId}`, updatedSteps);
 	};
-	const handleFormChange = useCallback(
-		(newFormData: StepType) => {
-			setFormData(newFormData);
-			if (mode === 'create') {
-				localStorage.setItem('createFormData', JSON.stringify(newFormData));
-			} else if (
-				mode === 'edit' &&
-				currentStepIndex !== null &&
-				steps[currentStepIndex]
-			) {
-				const currentStep = steps[currentStepIndex];
-				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
-				localStorage.setItem(editDataKey, JSON.stringify(newFormData));
-			} else if (mode === 'edit' && !steps[currentStepIndex]) {
-				console.error('Current step not found.');
-			}
-		},
-		[mode, steps, currentStepIndex, guideSetId, getEditFormDataKey]
-	);
+
+	// const handleFormChange = useCallback(
+	// 	(newFormData: StepType) => {
+	// 		setFormData(newFormData);
+	// 		if (mode === 'create') {
+	// 			localStorage.setItem('createFormData', JSON.stringify(newFormData));
+	// 		} else if (
+	// 			mode === 'edit' &&
+	// 			currentStepIndex !== null &&
+	// 			steps[currentStepIndex]
+	// 		) {
+	// 			const currentStep = steps[currentStepIndex];
+	// 			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
+	// 			localStorage.setItem(editDataKey, JSON.stringify(newFormData));
+	// 		} else if (mode === 'edit' && !steps[currentStepIndex]) {
+	// 			console.error('Current step not found.');
+	// 		}
+	// 	},
+	// 	[mode, steps, currentStepIndex, guideSetId, getEditFormDataKey]
+	// );
 
 	const handleEditStep = (stepIndex: number) => {
 		if (steps[stepIndex]) {
@@ -302,9 +303,15 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 							<GuideStepForm
 								data={formData}
 								mode={mode}
-								onChange={handleFormChange}
-								handleSaveStep={handleSaveStep}
-								handleCancel={handleCancel}
+								// onChange={handleFormChange}
+								// onSave={step => {
+								// 	console.log('submitted -', step);
+								// }}
+								onSave={handleSaveStep}
+								// onCancel={() => {
+								// 	console.log('canceled');
+								// }}
+								onCancel={handleCancel}
 							/>
 						</Modal>
 					)}
