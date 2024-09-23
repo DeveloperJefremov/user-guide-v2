@@ -1,6 +1,8 @@
 import { DevTool } from '@hookform/devtools';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import Button from '../../UI/Button';
 
 interface GuideSetHeaderFormProps {
@@ -12,6 +14,11 @@ interface GuideSetHeaderFormProps {
 	onCancel: () => void;
 }
 
+// Схема валидации с Zod
+const guideSetHeaderSchema = z.object({
+	title: z.string().min(1, { message: 'Title is required' }), // Минимум 1 символ
+});
+
 const GuideSetHeaderForm: FC<GuideSetHeaderFormProps> = ({
 	mode,
 	title,
@@ -20,7 +27,17 @@ const GuideSetHeaderForm: FC<GuideSetHeaderFormProps> = ({
 	onSave,
 	onCancel,
 }) => {
-	const { register, handleSubmit, setValue, watch, control } = useForm();
+	const {
+		register,
+		handleSubmit,
+		setValue,
+		watch,
+		control,
+		formState: { errors },
+	} = useForm({
+		resolver: zodResolver(guideSetHeaderSchema), // Используем Zod для валидации
+		defaultValues: { title: title || '' },
+	});
 
 	const watchedTitle = watch('title', '');
 
@@ -68,10 +85,14 @@ const GuideSetHeaderForm: FC<GuideSetHeaderFormProps> = ({
 				</label>
 				<input
 					id='titleInput'
-					{...register('title', { required: true })}
+					{...register('title')}
 					className='p-3 text-base border border-gray-300 rounded focus:border-blue-500 mb-5'
 					placeholder='Enter title'
 				/>
+				{errors.title && (
+					<p className='text-red-500'>{errors.title?.message}</p>
+				)}{' '}
+				{/* Отображение ошибок */}
 				<div className='flex justify-end gap-3'>
 					<Button onClick={onCancel} variant='lightGrey' size='lg'>
 						Cancel

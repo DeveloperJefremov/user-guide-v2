@@ -1,6 +1,6 @@
 import { DevTool } from '@hookform/devtools';
 import { FC, ReactNode, useCallback, useState } from 'react';
-import { useForm } from 'react-hook-form'; // Импортируем useForm из react-hook-form
+import { useForm } from 'react-hook-form';
 import { GuideSetType, ModeType } from '../../data/types';
 import Button from '../../UI/Button';
 import GuideStepsList from '../steps/GuideStepsList';
@@ -89,10 +89,9 @@ const GuideSetHeader: FC<GuideSetHeaderProps> = ({
 
 	const { register, handleSubmit, watch, control } = useForm<GuideSetFormData>({
 		defaultValues: { status: '' },
-	}); // Инициализация useForm
-
+	});
 	const handleToggleOnOff = () => {
-		setIsOn(prev => !prev); // Переключение состояния
+		setIsOn(prev => !prev);
 	};
 
 	const onSubmit = (data: GuideSetFormData) => {
@@ -126,7 +125,7 @@ const GuideSetHeader: FC<GuideSetHeaderProps> = ({
 					{watch('status') === 'completed' && (
 						<div>
 							<Button onClick={handleToggleOnOff} variant='lightGrey' size='lg'>
-								{isOn ? 'Off' : 'On'}
+								{isOn ? 'On' : 'Off'}
 							</Button>
 						</div>
 					)}
