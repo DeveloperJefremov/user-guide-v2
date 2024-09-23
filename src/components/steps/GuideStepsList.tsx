@@ -121,6 +121,22 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 		getEditFormDataKey,
 	]);
 
+	useEffect(() => {
+		if (
+			mode === 'execute' &&
+			activeGuideSetId === guideSetId &&
+			steps[currentStepIndex]?.elementId
+		) {
+			highlightElement(steps[currentStepIndex].elementId);
+		}
+
+		return () => {
+			if (steps[currentStepIndex]?.elementId) {
+				removeHighlightElement(steps[currentStepIndex].elementId);
+			}
+		};
+	}, [currentStepIndex, mode, steps, activeGuideSetId, guideSetId]);
+
 	const clearLocalStorage = useCallback(() => {
 		if (mode === 'create') {
 			localStorage.removeItem('createFormData');
@@ -139,15 +155,14 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 		setIsModalOpen(true);
 	}, [onModeChange]);
 
-	const handleSaveStep = useCallback(async () => {
+	const handleSaveStep = async (newStep: StepType) => {
 		let updatedSteps;
 		if (mode === 'create') {
-			const newStep = { ...formData, id: String(steps.length + 1) };
 			updatedSteps = [...steps, newStep];
 			handleStepsIdListUpdate(guideSetId, newStep.id);
 		} else {
 			updatedSteps = steps.map((step, index) =>
-				index === currentStepIndex ? { ...step, ...formData } : step
+				index === currentStepIndex ? { ...step, ...newStep } : step
 			);
 		}
 
@@ -158,15 +173,7 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 		setIsModalOpen(false);
 		setFormData(initialFormData);
 		clearLocalStorage();
-	}, [
-		mode,
-		formData,
-		steps,
-		currentStepIndex,
-		guideSetId,
-		handleStepsIdListUpdate,
-		clearLocalStorage,
-	]);
+	};
 
 	const handleDeleteStep = async (stepIndex: number) => {
 		const updatedSteps = steps.filter((_, index) => index !== stepIndex);
@@ -273,22 +280,6 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 		setIsModalOpen(false);
 	};
 
-	useEffect(() => {
-		if (
-			mode === 'execute' &&
-			activeGuideSetId === guideSetId &&
-			steps[currentStepIndex]?.elementId
-		) {
-			highlightElement(steps[currentStepIndex].elementId);
-		}
-
-		return () => {
-			if (steps[currentStepIndex]?.elementId) {
-				removeHighlightElement(steps[currentStepIndex].elementId);
-			}
-		};
-	}, [currentStepIndex, mode, steps, activeGuideSetId, guideSetId]);
-
 	return (
 		<div className='flex flex-col pt-4'>
 			<header className='flex flex-row-reverse justify-between items-center'>
@@ -303,10 +294,12 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 							<GuideStepForm
 								data={formData}
 								mode={mode}
+								stepsLength={steps.length}
 								// onChange={handleFormChange}
 								// onSave={step => {
 								// 	console.log('submitted -', step);
 								// }}
+
 								onSave={handleSaveStep}
 								// onCancel={() => {
 								// 	console.log('canceled');

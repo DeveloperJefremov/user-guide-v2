@@ -35,12 +35,15 @@ interface GuideStepFormProps {
 	// onChange: (updatedData: StepType) => void;
 	onSave: (step: StepType) => void;
 	onCancel: () => void;
+	stepsLength: number;
 }
 
 const GuideStepForm = ({
 	data,
 	mode,
 	// onChange,
+
+	stepsLength,
 	onSave,
 	onCancel,
 }: GuideStepFormProps) => {
@@ -54,7 +57,10 @@ const GuideStepForm = ({
 		formState: { errors },
 	} = useForm<StepType>({
 		resolver: zodResolver(guideStepSchema),
-		defaultValues: data,
+		defaultValues: {
+			...data,
+			id: data.id ? data.id : String(stepsLength + 1),
+		},
 	});
 
 	// const prevFormValues = useRef<StepType>(data);
@@ -65,6 +71,17 @@ const GuideStepForm = ({
 	}, [data, reset]);
 
 	const formValues = watch();
+
+	useEffect(() => {
+		if (mode === 'create') {
+			localStorage.setItem('createFormData', JSON.stringify(formValues));
+		} else if (mode === 'edit') {
+			localStorage.setItem(
+				`editFormData_${formValues.id}`,
+				JSON.stringify(formValues)
+			);
+		}
+	}, [formValues]);
 
 	// Автофокус на поле Title
 	// useEffect(() => {
@@ -84,7 +101,7 @@ const GuideStepForm = ({
 
 	const handleSave = (step: StepType) => {
 		onSave(step);
-		reset(data);
+		// reset(data);
 	};
 
 	const keyDownHandler = (event: React.KeyboardEvent<HTMLFormElement>) => {
@@ -122,12 +139,27 @@ const GuideStepForm = ({
 		}
 	};
 
+	// const handleFormChange = (data: StepType) => {
+
+	// 	if (mode === 'create') {
+	// 		localStorage.setItem ('createFormData', JSON.stringify(data));
+	// 	} else if (mode === 'edit' ) {
+
+	// 		localStorage.setItem(`editFormData_${data.id}`, JSON.stringify(data));
+	// 	}
+
+	// 	}
+	// 	//rhf form
+
+	// }
+
 	return (
 		<div className='flex flex-col gap-5 p-5'>
 			<form
 				className='flex flex-col gap-4'
 				onSubmit={handleSubmit(handleSave)}
 				onKeyDown={keyDownHandler}
+				// onChange={handleFormChange}
 			>
 				{/* Поле Title */}
 				<label htmlFor='title' className='block'>

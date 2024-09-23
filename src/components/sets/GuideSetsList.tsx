@@ -33,6 +33,17 @@ const GuideSetsList: FC = () => {
 		loadData();
 	}, []);
 
+	// Сохраняем данные в LocalForage при изменении guideSetsList
+	useEffect(() => {
+		const saveDataToLocalForage = async () => {
+			await localforage.setItem('guideSets', guideSetsList);
+		};
+
+		if (guideSetsList.length > 0) {
+			saveDataToLocalForage();
+		}
+	}, [guideSetsList]);
+
 	// Функция для обновления stepsIdList
 	const handleStepsIdListUpdate = (setId: string, stepId: string) => {
 		const updatedGuideSetsList = guideSetsList.map(set => {
@@ -47,17 +58,6 @@ const GuideSetsList: FC = () => {
 
 		setGuideSetsList(updatedGuideSetsList);
 	};
-
-	// Сохраняем данные в LocalForage при изменении guideSetsList
-	useEffect(() => {
-		const saveDataToLocalForage = async () => {
-			await localforage.setItem('guideSets', guideSetsList);
-		};
-
-		if (guideSetsList.length > 0) {
-			saveDataToLocalForage();
-		}
-	}, [guideSetsList]);
 
 	const handleTitleChange = useCallback(
 		(newTitle: string) => {
