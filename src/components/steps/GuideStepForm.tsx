@@ -44,7 +44,7 @@ const GuideStepForm = ({
 	mode,
 	// onChange,
 	isModalOpen,
-	stepsLength,
+	// stepsLength,
 	onSave,
 	onCancel,
 }: GuideStepFormProps) => {
@@ -58,10 +58,11 @@ const GuideStepForm = ({
 		formState: { errors },
 	} = useForm<StepType>({
 		resolver: zodResolver(guideStepSchema),
-		defaultValues: {
-			...data,
-			id: data.id ? data.id : String(stepsLength + 1),
-		},
+		defaultValues: data,
+		//  {
+		// ...data,
+		// id: data.id ? data.id : String(stepsLength + 1),
+		// },
 	});
 
 	// const prevFormValues = useRef<StepType>(data);

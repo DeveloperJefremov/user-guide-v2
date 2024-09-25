@@ -164,8 +164,12 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 	const handleSaveStep = async (newStep: StepType) => {
 		let updatedSteps;
 		if (mode === 'create') {
-			updatedSteps = [...steps, newStep];
-			handleStepsIdListUpdate(guideSetId, newStep.id);
+			const stepWithId = {
+				...newStep,
+				id: String(steps.length + 1), // ID создаётся на основе длины массива + 1
+			};
+			updatedSteps = [...steps, stepWithId];
+			handleStepsIdListUpdate(guideSetId, stepWithId.id);
 		} else {
 			updatedSteps = steps.map((step, index) =>
 				index === currentStepIndex ? { ...step, ...newStep } : step
@@ -176,10 +180,40 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 
 		setSteps(sortedUpdatedSteps);
 		await localforage.setItem(`guideSteps_${guideSetId}`, sortedUpdatedSteps);
+
 		setIsModalOpen(false);
 		setFormData(initialFormData);
 		clearLocalStorage();
 	};
+
+	// const handleSaveStep = useCallback(async () => {
+	// 	let updatedSteps;
+	// 	if (mode === 'create') {
+	// 		const newStep = { ...formData, id: String(steps.length + 1) };
+	// 		updatedSteps = [...steps, newStep];
+	// 		handleStepsIdListUpdate(guideSetId, newStep.id);
+	// 	} else {
+	// 		updatedSteps = steps.map((step, index) =>
+	// 			index === currentStepIndex ? { ...step, ...formData } : step
+	// 		);
+	// 	}
+
+	// 	const sortedUpdatedSteps = updatedSteps.sort((a, b) => a.order - b.order);
+
+	// 	setSteps(sortedUpdatedSteps);
+	// 	await localforage.setItem(`guideSteps_${guideSetId}`, sortedUpdatedSteps);
+	// 	setIsModalOpen(false);
+	// 	setFormData(initialFormData);
+	// 	clearLocalStorage();
+	// }, [
+	// 	mode,
+	// 	formData,
+	// 	steps,
+	// 	currentStepIndex,
+	// 	guideSetId,
+	// 	handleStepsIdListUpdate,
+	// 	clearLocalStorage,
+	// ]);
 
 	const handleDeleteStep = async (stepIndex: number) => {
 		const updatedSteps = steps.filter((_, index) => index !== stepIndex);
