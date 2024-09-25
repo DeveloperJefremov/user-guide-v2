@@ -83,43 +83,43 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 	}, [steps, guideSetId]);
 
 	// Загрузка данных из localStorage при открытии модального окна
-	useEffect(() => {
-		if (isModalOpen) {
-			try {
-				if (mode === 'create') {
-					const savedCreateData = localStorage.getItem('createFormData');
-					if (savedCreateData) {
-						setFormData(JSON.parse(savedCreateData));
-					} else {
-						setFormData(initialFormData);
-					}
-				} else if (mode === 'edit') {
-					if (steps[currentStepIndex]) {
-						const currentStep = steps[currentStepIndex];
-						const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
-						const savedEditData = localStorage.getItem(editDataKey);
-						if (savedEditData) {
-							setFormData(JSON.parse(savedEditData));
-						} else {
-							setFormData(currentStep);
-						}
-					} else {
-						console.error('Current step not found!!!!');
-					}
-				}
-			} catch (error) {
-				console.error('Error parsing local storage data:', error);
-				setFormData(initialFormData); // fallback to default
-			}
-		}
-	}, [
-		isModalOpen,
-		mode,
-		currentStepIndex,
-		steps,
-		guideSetId,
-		getEditFormDataKey,
-	]);
+	// useEffect(() => {
+	// 	if (isModalOpen) {
+	// 		try {
+	// 			if (mode === 'create') {
+	// 				const savedCreateData = localStorage.getItem('createFormData');
+	// 				if (savedCreateData) {
+	// 					setFormData(JSON.parse(savedCreateData));
+	// 				} else {
+	// 					setFormData(initialFormData);
+	// 				}
+	// 			} else if (mode === 'edit') {
+	// 				if (steps[currentStepIndex]) {
+	// 					const currentStep = steps[currentStepIndex];
+	// 					const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
+	// 					const savedEditData = localStorage.getItem(editDataKey);
+	// 					if (savedEditData) {
+	// 						setFormData(JSON.parse(savedEditData));
+	// 					} else {
+	// 						setFormData(currentStep);
+	// 					}
+	// 				} else {
+	// 					console.error('Current step not found!!!!');
+	// 				}
+	// 			}
+	// 		} catch (error) {
+	// 			console.error('Error parsing local storage data:', error);
+	// 			setFormData(initialFormData); // fallback to default
+	// 		}
+	// 	}
+	// }, [
+	// 	isModalOpen,
+	// 	mode,
+	// 	currentStepIndex,
+	// 	steps,
+	// 	guideSetId,
+	// 	getEditFormDataKey,
+	// ]);
 
 	useEffect(() => {
 		if (
@@ -150,7 +150,13 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 	}, [mode, steps, currentStepIndex, guideSetId, getEditFormDataKey]);
 
 	const handleCreateStep = useCallback(() => {
-		setFormData(initialFormData);
+		const savedCreateData = localStorage.getItem('createFormData');
+		if (savedCreateData) {
+			setFormData(JSON.parse(savedCreateData)); // Подгружаем данные из localStorage
+		} else {
+			setFormData(initialFormData); // Если данных нет, подгружаем пустые
+		}
+		// setFormData(initialFormData);
 		onModeChange('create');
 		setIsModalOpen(true);
 	}, [onModeChange]);
@@ -268,8 +274,9 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 
 	// Закрытие окна при клике на backdrop (серый фон) только для create/edit
 	const handleBackdropClick = () => {
-		if (mode === 'create') {
-			localStorage.setItem('createFormData', JSON.stringify(formData));
+		const savedCreateData = localStorage.getItem('createFormData');
+		if (savedCreateData) {
+			setFormData(JSON.parse(savedCreateData)); // Подгружаем данные из localStorage
 		} else if (mode === 'edit') {
 			if (steps[currentStepIndex]) {
 				const currentStep = steps[currentStepIndex];
@@ -295,6 +302,7 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 								data={formData}
 								mode={mode}
 								stepsLength={steps.length}
+								isModalOpen={isModalOpen}
 								// onChange={handleFormChange}
 								// onSave={step => {
 								// 	console.log('submitted -', step);

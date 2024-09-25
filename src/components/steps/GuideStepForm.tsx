@@ -1,4 +1,4 @@
-import { DevTool } from '@hookform/devtools';
+// import { DevTool } from '@hookform/devtools';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { ChangeEvent, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -36,13 +36,14 @@ interface GuideStepFormProps {
 	onSave: (step: StepType) => void;
 	onCancel: () => void;
 	stepsLength: number;
+	isModalOpen: boolean;
 }
 
 const GuideStepForm = ({
 	data,
 	mode,
 	// onChange,
-
+	isModalOpen,
 	stepsLength,
 	onSave,
 	onCancel,
@@ -53,7 +54,7 @@ const GuideStepForm = ({
 		watch,
 		setValue,
 		reset,
-		control,
+		// control,
 		formState: { errors },
 	} = useForm<StepType>({
 		resolver: zodResolver(guideStepSchema),
@@ -72,16 +73,34 @@ const GuideStepForm = ({
 
 	const formValues = watch();
 
+	// useEffect(() => {
+	// 	if (mode === 'create') {
+	// 		localStorage.setItem('createFormData', JSON.stringify(formValues));
+	// 	} else if (mode === 'edit') {
+	// 		localStorage.setItem(
+	// 			`editFormData_${formValues.id}`,
+	// 			JSON.stringify(formValues)
+	// 		);
+	// 	}
+	// }, [formValues]);
+
+	// Загружаем данные из localStorage при каждом открытии модального окна
+	useEffect(() => {
+		if (isModalOpen && mode === 'create') {
+			const savedCreateData = localStorage.getItem('createFormData');
+			if (savedCreateData) {
+				reset(JSON.parse(savedCreateData)); // Подгружаем данные из localStorage
+			} else {
+				reset(data); // Если данных нет, подгружаем дефолтные данные
+			}
+		}
+	}, [isModalOpen, mode, reset, data]);
+	// Сохраняем данные в localStorage при каждом изменении формы в режиме 'create'
 	useEffect(() => {
 		if (mode === 'create') {
 			localStorage.setItem('createFormData', JSON.stringify(formValues));
-		} else if (mode === 'edit') {
-			localStorage.setItem(
-				`editFormData_${formValues.id}`,
-				JSON.stringify(formValues)
-			);
 		}
-	}, [formValues]);
+	}, [formValues, mode]);
 
 	// Автофокус на поле Title
 	// useEffect(() => {
@@ -101,13 +120,13 @@ const GuideStepForm = ({
 
 	const handleSave = (step: StepType) => {
 		onSave(step);
-		// reset(data);
 	};
 
 	const keyDownHandler = (event: React.KeyboardEvent<HTMLFormElement>) => {
 		const key = event.key;
 		if (key === 'Enter') {
 			event.preventDefault();
+			localStorage.removeItem('createFormData');
 		}
 	};
 
@@ -314,7 +333,7 @@ const GuideStepForm = ({
 				</div>
 			</form>
 
-			<DevTool control={control} />
+			{/* <DevTool control={control} /> */}
 		</div>
 	);
 };
