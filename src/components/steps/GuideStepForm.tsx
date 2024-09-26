@@ -70,11 +70,11 @@ const GuideStepForm = ({
 			const savedEditData = localStorage.getItem(editDataKey);
 
 			if (savedEditData) {
-				console.log('Loading from localStorage:', savedEditData);
+				// console.log('Loading from localStorage:', savedEditData);
 				reset(JSON.parse(savedEditData)); // Подгружаем данные из localStorage
 				setLocalDataLoaded(true); // Флаг, что данные из localStorage загружены
 			} else {
-				console.log('No data in localStorage, using passed data:', data);
+				// console.log('No data in localStorage, using passed data:', data);
 				reset(data); // Если данных нет в localStorage, подгружаем переданные данные
 				setLocalDataLoaded(true); // Ставим флаг, что данные загружены из пропсов
 			}
@@ -89,15 +89,22 @@ const GuideStepForm = ({
 		localDataLoaded,
 	]);
 
-	// Сохранение данных в localStorage при изменении формы
 	useEffect(() => {
-		if (mode === 'edit') {
+		if (isModalOpen && mode === 'edit' && localDataLoaded) {
+			// Только когда данные из localStorage были загружены, сохраняем изменения
 			const editDataKey = getEditFormDataKey(guideSetId, formValues.id);
 			localStorage.setItem(editDataKey, JSON.stringify(formValues));
 		} else if (mode === 'create') {
 			localStorage.setItem('createFormData', JSON.stringify(formValues));
 		}
-	}, [formValues, mode, guideSetId, getEditFormDataKey]);
+	}, [
+		formValues,
+		mode,
+		isModalOpen,
+		guideSetId,
+		getEditFormDataKey,
+		localDataLoaded,
+	]);
 
 	// Логика сохранения шага
 	const handleSave = (step: StepType) => {
@@ -117,6 +124,7 @@ const GuideStepForm = ({
 	const handleCancel = () => {
 		reset(data); // Вернем форму к начальным данным
 		onCancel();
+		setLocalDataLoaded(false); // Сбрасываем флаг при отмене
 	};
 
 	// Логика для загрузки случайного изображения
