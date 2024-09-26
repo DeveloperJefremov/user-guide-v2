@@ -1,6 +1,5 @@
-// import { DevTool } from '@hookform/devtools';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { ChangeEvent, useEffect } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { StepType } from '../../data/types';
@@ -17,11 +16,11 @@ const guideStepSchema = z.object({
 	imgWidth: z
 		.union([z.string(), z.number()])
 		.optional()
-		.transform(val => (typeof val === 'string' ? parseInt(val, 10) : val)), // Преобразуем строку в число
+		.transform(val => (typeof val === 'string' ? parseInt(val, 10) : val)),
 	imgHeight: z
 		.union([z.string(), z.number()])
 		.optional()
-		.transform(val => (typeof val === 'string' ? parseInt(val, 10) : val)), // Преобразуем строку в число
+		.transform(val => (typeof val === 'string' ? parseInt(val, 10) : val)),
 	imageUrl: z
 		.string()
 		.url({ message: 'Invalid image URL' })
@@ -32,21 +31,22 @@ const guideStepSchema = z.object({
 interface GuideStepFormProps {
 	data: StepType;
 	mode: 'create' | 'edit' | 'view';
-	// onChange: (updatedData: StepType) => void;
 	onSave: (step: StepType) => void;
 	onCancel: () => void;
 	stepsLength: number;
 	isModalOpen: boolean;
+	getEditFormDataKey: (guideSetId: string, stepId: string) => string;
+	guideSetId: string;
 }
 
 const GuideStepForm = ({
 	data,
 	mode,
-	// onChange,
 	isModalOpen,
-	// stepsLength,
 	onSave,
 	onCancel,
+	getEditFormDataKey,
+	guideSetId,
 }: GuideStepFormProps) => {
 	const {
 		register,
@@ -54,89 +54,72 @@ const GuideStepForm = ({
 		watch,
 		setValue,
 		reset,
-		// control,
 		formState: { errors },
 	} = useForm<StepType>({
 		resolver: zodResolver(guideStepSchema),
 		defaultValues: data,
-		//  {
-		// ...data,
-		// id: data.id ? data.id : String(stepsLength + 1),
-		// },
 	});
 
-	// const prevFormValues = useRef<StepType>(data);
-
-	// Сброс формы при изменении data
-	useEffect(() => {
-		reset(data);
-	}, [data, reset]);
-
 	const formValues = watch();
+	const [localDataLoaded, setLocalDataLoaded] = useState(false); // Флаг для отслеживания загрузки данных из localStorage
 
-	// useEffect(() => {
-	// 	if (mode === 'create') {
-	// 		localStorage.setItem('createFormData', JSON.stringify(formValues));
-	// 	} else if (mode === 'edit') {
-	// 		localStorage.setItem(
-	// 			`editFormData_${formValues.id}`,
-	// 			JSON.stringify(formValues)
-	// 		);
-	// 	}
-	// }, [formValues]);
-
-	// Загружаем данные из localStorage при каждом открытии модального окна
+	// Сброс формы при изменении data или открытии модального окна
 	useEffect(() => {
-		if (isModalOpen && mode === 'create') {
-			const savedCreateData = localStorage.getItem('createFormData');
-			if (savedCreateData) {
-				reset(JSON.parse(savedCreateData)); // Подгружаем данные из localStorage
+		if (isModalOpen && mode === 'edit' && !localDataLoaded) {
+			const editDataKey = getEditFormDataKey(guideSetId, data.id);
+			const savedEditData = localStorage.getItem(editDataKey);
+
+			if (savedEditData) {
+				console.log('Loading from localStorage:', savedEditData);
+				reset(JSON.parse(savedEditData)); // Подгружаем данные из localStorage
+				setLocalDataLoaded(true); // Флаг, что данные из localStorage загружены
 			} else {
-				reset(data); // Если данных нет, подгружаем дефолтные данные
+				console.log('No data in localStorage, using passed data:', data);
+				reset(data); // Если данных нет в localStorage, подгружаем переданные данные
+				setLocalDataLoaded(true); // Ставим флаг, что данные загружены из пропсов
 			}
 		}
-	}, [isModalOpen, mode, reset, data]);
-	// Сохраняем данные в localStorage при каждом изменении формы в режиме 'create'
+	}, [
+		isModalOpen,
+		mode,
+		reset,
+		data,
+		getEditFormDataKey,
+		guideSetId,
+		localDataLoaded,
+	]);
+
+	// Сохранение данных в localStorage при изменении формы
 	useEffect(() => {
-		if (mode === 'create') {
+		if (mode === 'edit') {
+			const editDataKey = getEditFormDataKey(guideSetId, formValues.id);
+			localStorage.setItem(editDataKey, JSON.stringify(formValues));
+		} else if (mode === 'create') {
 			localStorage.setItem('createFormData', JSON.stringify(formValues));
 		}
-	}, [formValues, mode]);
+	}, [formValues, mode, guideSetId, getEditFormDataKey]);
 
-	// Автофокус на поле Title
-	// useEffect(() => {
-	// 	const firstField = document.getElementById('title');
-	// 	if (firstField) {
-	// 		firstField.focus();
-	// 	}
-	// }, []);
-
-	// Избегаем бесконечного цикла обновления
-	// useEffect(() => {
-	// 	if (JSON.stringify(formValues) !== JSON.stringify(prevFormValues.current)) {
-	// 		prevFormValues.current = formValues;
-	// 		onChange(formValues);
-	// 	}
-	// }, [formValues, mode, data.id]);
-
+	// Логика сохранения шага
 	const handleSave = (step: StepType) => {
 		onSave(step);
-	};
 
-	const keyDownHandler = (event: React.KeyboardEvent<HTMLFormElement>) => {
-		const key = event.key;
-		if (key === 'Enter') {
-			event.preventDefault();
+		// Очищаем данные из localStorage после сохранения
+		if (mode === 'create') {
 			localStorage.removeItem('createFormData');
+		} else if (mode === 'edit') {
+			const editDataKey = getEditFormDataKey(guideSetId, step.id);
+			localStorage.removeItem(editDataKey);
+			setLocalDataLoaded(false); // Сбрасываем флаг после сохранения данных
 		}
 	};
 
+	// Логика для отмены изменений и сброса формы
 	const handleCancel = () => {
-		reset(data);
+		reset(data); // Вернем форму к начальным данным
 		onCancel();
 	};
 
-	// Логика для загрузки случайной картинки
+	// Логика для загрузки случайного изображения
 	const handleImgCheckboxChange = async (e: ChangeEvent<HTMLInputElement>) => {
 		const checked = e.target.checked;
 
@@ -159,28 +142,9 @@ const GuideStepForm = ({
 		}
 	};
 
-	// const handleFormChange = (data: StepType) => {
-
-	// 	if (mode === 'create') {
-	// 		localStorage.setItem ('createFormData', JSON.stringify(data));
-	// 	} else if (mode === 'edit' ) {
-
-	// 		localStorage.setItem(`editFormData_${data.id}`, JSON.stringify(data));
-	// 	}
-
-	// 	}
-	// 	//rhf form
-
-	// }
-
 	return (
 		<div className='flex flex-col gap-5 p-5'>
-			<form
-				className='flex flex-col gap-4'
-				onSubmit={handleSubmit(handleSave)}
-				onKeyDown={keyDownHandler}
-				// onChange={handleFormChange}
-			>
+			<form className='flex flex-col gap-4' onSubmit={handleSubmit(handleSave)}>
 				{/* Поле Title */}
 				<label htmlFor='title' className='block'>
 					Title:
@@ -333,8 +297,6 @@ const GuideStepForm = ({
 					</Button>
 				</div>
 			</form>
-
-			{/* <DevTool control={control} /> */}
 		</div>
 	);
 };

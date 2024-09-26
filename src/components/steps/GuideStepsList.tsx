@@ -306,16 +306,19 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 		}
 	};
 
-	// Закрытие окна при клике на backdrop (серый фон) только для create/edit
+	// Закрытие окна при клике на backdrop (серый фон) для create/edit mode
 	const handleBackdropClick = () => {
-		const savedCreateData = localStorage.getItem('createFormData');
-		if (savedCreateData) {
-			setFormData(JSON.parse(savedCreateData)); // Подгружаем данные из localStorage
-		} else if (mode === 'edit') {
-			if (steps[currentStepIndex]) {
-				const currentStep = steps[currentStepIndex];
-				const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
-				localStorage.setItem(editDataKey, JSON.stringify(formData));
+		if (mode === 'create') {
+			const savedCreateData = localStorage.getItem('createFormData');
+			if (savedCreateData) {
+				setFormData(JSON.parse(savedCreateData)); // Подгружаем данные из localStorage
+			}
+		} else if (mode === 'edit' && steps[currentStepIndex]) {
+			const currentStep = steps[currentStepIndex];
+			const editDataKey = getEditFormDataKey(guideSetId, currentStep.id);
+			const savedEditData = localStorage.getItem(editDataKey);
+			if (savedEditData) {
+				setFormData(JSON.parse(savedEditData)); // Подгружаем обновленные данные из localStorage
 			}
 		}
 		setIsModalOpen(false);
@@ -337,6 +340,8 @@ const GuideStepsList: FC<GuideStepsListProps> = ({
 								mode={mode}
 								stepsLength={steps.length}
 								isModalOpen={isModalOpen}
+								getEditFormDataKey={getEditFormDataKey}
+								guideSetId={guideSetId}
 								// onChange={handleFormChange}
 								// onSave={step => {
 								// 	console.log('submitted -', step);
